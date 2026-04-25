@@ -19,6 +19,10 @@ return new class extends Migration
             $table->integer('qty');
             $table->date('tanggal');
             $table->timestamps();
+            $table->enum('status', ['pending', 'approved', 'rejected'])->default('pending');
+
+            $table->foreignId('approved_by')->nullable()->constrained('users');
+            $table->timestamp('approved_at')->nullable();
         });
     }
 

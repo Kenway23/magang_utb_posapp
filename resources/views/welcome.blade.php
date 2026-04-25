@@ -273,5 +273,19 @@
         @if (Route::has('login'))
             <div class="h-14.5 hidden lg:block"></div>
         @endif
+        @foreach ($stokMasuks as $item)
+        <tr>
+            <td>{{ $item->produk_id }}</td>
+            <td>{{ $item->qty }}</td>
+            <td>{{ $item->status }}</td>
+
+            <td>
+                @if($item->status == 'pending')
+                    <a href="/stok-masuk/approve/{{ $item->id }}">Approve</a>
+                    <a href="/stok-masuk/reject/{{ $item->id }}">Reject</a>
+                @endif
+            </td>
+        </tr>
+        @endforeach
     </body>
 </html>
