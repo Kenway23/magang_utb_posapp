@@ -19,13 +19,9 @@ Route::prefix('owner')->name('owner.')->group(function () {
     })->name('dashboard');
 
     // Halaman Produk
-    Route::get('/kategori', function () {
-        return view('owner.kategori');
-    })->name('kategori');
-
-    Route::get('/satuan', function () {
-        return view('owner.satuan');
-    })->name('satuan');
+    Route::get('/produk', function () {
+        return view('owner.produk');
+    })->name('produk');
 
     // Halaman Stok
     Route::prefix('stok')->name('stok.')->group(function () {
@@ -68,10 +64,6 @@ Route::prefix('kasir')->name('kasir.')->group(function () {
         return view('kasir.d_kasir');
     })->name('dashboard');
 
-    Route::get('/produk', function () {
-        return view('kasir.produk');
-    })->name('produk');
-
     Route::get('/riwayat-transaksi', function () {
         return view('kasir.riwayat_transaksi');
     })->name('riwayat_transaksi');
@@ -87,6 +79,11 @@ Route::prefix('gudang')->name('gudang.')->group(function () {
     Route::get('/dashboard', function () {
         return view('gudang.d_gudang');
     })->name('dashboard');
+
+    //Halaman Produk
+    Route::get('/produk', function () {
+        return view('gudang.produk');
+    })->name('produk');
 
     // Halaman Stok
     Route::prefix('stok')->name('stok.')->group(function () {

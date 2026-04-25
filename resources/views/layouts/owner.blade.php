@@ -148,21 +148,10 @@
 
                 <!-- Produk Dropdown -->
                 <div>
-                    <button onclick="toggleSubmenu('produkSubmenu', 'produkIcon')"
-                        class="sidebar-item flex items-center justify-between w-full px-4 py-3 rounded-xl transition-all duration-200">
-                        <div class="flex items-center gap-3"><i class="fas fa-box w-5 h-5"></i><span>Produk</span></div>
-                        <i id="produkIcon" class="fas fa-chevron-right text-xs rotate-icon"></i>
-                    </button>
-                    <div id="produkSubmenu" class="submenu-collapse ml-6 mt-1 space-y-1">
-                        <a href="{{ route('owner.kategori') }}"
-                            class="submenu-item flex items-center gap-2 px-4 py-2 rounded-lg text-sm transition-all duration-200 text-slate-600 hover:bg-slate-50">
-                            <i class="fas fa-tags w-4 h-4"></i> Kategori
-                        </a>
-                        <a href="{{ route('owner.satuan') }}"
-                            class="submenu-item flex items-center gap-2 px-4 py-2 rounded-lg text-sm transition-all duration-200 text-slate-600 hover:bg-slate-50">
-                            <i class="fas fa-boxes w-4 h-4"></i> Satuan
-                        </a>
-                    </div>
+                    <a href="{{ route('owner.produk') }}"
+                        class="sidebar-item flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 {{ request()->routeIs('owner.produk') ? 'sidebar-item-active' : 'text-slate-600 hover:bg-slate-50' }}">
+                        <i class="fas fa-box w-5 h-5"></i> Produk
+                    </a>
                 </div>
 
                 <!-- Stok Dropdown -->

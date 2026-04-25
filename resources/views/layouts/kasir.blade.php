@@ -145,12 +145,7 @@
                     <span>Beranda</span>
                 </a>
 
-                <!-- Produk -->
-                <a href="{{ route('kasir.produk') }}"
-                    class="sidebar-item flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 {{ request()->routeIs('kasir.produk') ? 'sidebar-item-active' : 'text-slate-600' }}">
-                    <i class="fas fa-box w-5 h-5"></i>
-                    <span>Produk</span>
-                </a>
+
 
                 <!-- Riwayat Transaksi -->
                 <a href="{{ route('kasir.riwayat_transaksi') }}"

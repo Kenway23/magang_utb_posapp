@@ -209,6 +209,13 @@
                     <i class="fas fa-home w-5 h-5"></i> Beranda
                 </a>
 
+                <!-- Produk -->
+                <a href="{{ route('gudang.produk') }}"
+                    class="sidebar-item flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 {{ request()->routeIs('kasir.produk') ? 'sidebar-item-active' : 'text-slate-600' }}">
+                    <i class="fas fa-box w-5 h-5"></i>
+                    <span>Produk</span>
+                </a>
+
                 <!-- Stok Dropdown -->
                 <div>
                     <button onclick="toggleSubmenu('stokSubmenu', 'stokIcon')"
@@ -222,11 +229,11 @@
                     <div id="stokSubmenu" class="submenu-collapse ml-6 mt-1 space-y-1">
                         <a href="#" onclick="showPage('penerimaan')"
                             class="submenu-item flex items-center gap-2 px-4 py-2 rounded-lg text-sm transition-all duration-200 text-slate-600 hover:bg-slate-50">
-                            <i class="fas fa-arrow-down w-4 h-4"></i> Penerimaan
+                            <i class="fas fa-arrow-down w-4 h-4"></i> Stok Masuk
                         </a>
                         <a href="#" onclick="showPage('pengeluaran')"
                             class="submenu-item flex items-center gap-2 px-4 py-2 rounded-lg text-sm transition-all duration-200 text-slate-600 hover:bg-slate-50">
-                            <i class="fas fa-arrow-up w-4 h-4"></i> Pengeluaran
+                            <i class="fas fa-arrow-up w-4 h-4"></i> Stok Keluar
                         </a>
                         <a href="#" onclick="showPage('penyesuaian')"
                             class="submenu-item flex items-center gap-2 px-4 py-2 rounded-lg text-sm transition-all duration-200 text-slate-600 hover:bg-slate-50">
@@ -234,7 +241,7 @@
                         </a>
                         <a href="#" onclick="showPage('laporan_stok')"
                             class="submenu-item flex items-center gap-2 px-4 py-2 rounded-lg text-sm transition-all duration-200 text-slate-600 hover:bg-slate-50">
-                            <i class="fas fa-file-alt w-4 h-4"></i> Laporan Stok
+                            <i class="fas fa-file-alt w-4 h-4"></i> Laporan
                         </a>
                     </div>
                 </div>
@@ -678,16 +685,16 @@
                                 </thead>
                                 <tbody>
                                     ${stocks.slice(0,7).map((item, idx) => `
-                                            <tr class="border-b border-slate-100">
-                                                <td class="p-3">${idx+1}</td>
-                                                <td class="p-3 font-medium">${item.name}</td>
-                                                <td class="p-3">${item.category}</td>
-                                                <td class="p-3 ${item.stock < item.minStock ? 'text-red-600 font-bold' : ''}">
-                                                    ${item.stock} ${item.unit}
-                                                </td>
-                                                <td class="p-3">${item.minStock} ${item.unit}</td>
-                                            </tr>
-                                        `).join('')}
+                                                <tr class="border-b border-slate-100">
+                                                    <td class="p-3">${idx+1}</td>
+                                                    <td class="p-3 font-medium">${item.name}</td>
+                                                    <td class="p-3">${item.category}</td>
+                                                    <td class="p-3 ${item.stock < item.minStock ? 'text-red-600 font-bold' : ''}">
+                                                        ${item.stock} ${item.unit}
+                                                    </td>
+                                                    <td class="p-3">${item.minStock} ${item.unit}</td>
+                                                </tr>
+                                            `).join('')}
                                 </tbody>
                             </table>
                         </div>
@@ -701,14 +708,14 @@
                             </h3>
                             <div class="space-y-3">
                                 ${incomingTransactions.slice(0,3).map(t => `
-                                        <div class="flex justify-between items-center p-3 bg-slate-50 rounded-lg">
-                                            <div>
-                                                <span class="font-medium">${t.product}</span>
-                                                <span class="text-green-600 ml-2 font-semibold">+${t.qty} pcs</span>
+                                            <div class="flex justify-between items-center p-3 bg-slate-50 rounded-lg">
+                                                <div>
+                                                    <span class="font-medium">${t.product}</span>
+                                                    <span class="text-green-600 ml-2 font-semibold">+${t.qty} pcs</span>
+                                                </div>
+                                                <span class="text-xs text-slate-500">${t.time}</span>
                                             </div>
-                                            <span class="text-xs text-slate-500">${t.time}</span>
-                                        </div>
-                                    `).join('')}
+                                        `).join('')}
                             </div>
                             <button onclick="showPage('penerimaan')" class="mt-4 text-indigo-600 text-sm hover:underline">
                                 Lihat Semua Penerimaan →
@@ -721,14 +728,14 @@
                             </h3>
                             <div class="space-y-3">
                                 ${outgoingTransactions.slice(0,3).map(t => `
-                                        <div class="flex justify-between items-center p-3 bg-slate-50 rounded-lg">
-                                            <div>
-                                                <span class="font-medium">${t.product}</span>
-                                                <span class="text-red-600 ml-2 font-semibold">-${t.qty} pcs</span>
+                                            <div class="flex justify-between items-center p-3 bg-slate-50 rounded-lg">
+                                                <div>
+                                                    <span class="font-medium">${t.product}</span>
+                                                    <span class="text-red-600 ml-2 font-semibold">-${t.qty} pcs</span>
+                                                </div>
+                                                <span class="text-xs text-slate-500">${t.time}</span>
                                             </div>
-                                            <span class="text-xs text-slate-500">${t.time}</span>
-                                        </div>
-                                    `).join('')}
+                                        `).join('')}
                             </div>
                             <button onclick="showPage('pengeluaran')" class="mt-4 text-indigo-600 text-sm hover:underline">
                                 Lihat Semua Pengeluaran →
@@ -792,32 +799,26 @@
                             </thead>
                             <tbody>
                                 ${incomingTransactions.map((item, idx) => `
-                                        <tr class="border-b border-slate-100 hover:bg-slate-50">
-                                            <td class="p-3">${idx+1}</td>
-                                            <td class="p-3 font-mono text-xs">${item.code}</td>
-                                            <td class="p-3 font-medium">${item.product}</td>
-                                            <td class="p-3 text-green-600 font-medium">+${item.qty} pcs</td>
-                                            <td class="p-3">${item.date}</td>
-                                            <td class="p-3">
-                                                <span class="status-badge status-${item.status}">
-                                                    ${item.status === 'approved' ? 'Disetujui' : (item.status === 'pending' ? 'Pending' : 'Ditolak')}
-                                                </span>
-                                            </td>
-                                            <td class="p-3">
-                                                <button onclick="viewDetail('penerimaan', ${item.id})" class="text-indigo-600 hover:text-indigo-800 mr-2">
-                                                    <i class="fas fa-eye"></i>
-                                                </button>
-                                                ${item.status === 'pending' ? `
-                                                <button onclick="approveItem('penerimaan', ${item.id})" class="text-green-600 hover:text-green-800 mr-2">
-                                                    <i class="fas fa-check-circle"></i>
-                                                </button>
-                                                <button onclick="rejectItem('penerimaan', ${item.id})" class="text-red-600 hover:text-red-800">
-                                                    <i class="fas fa-times-circle"></i>
-                                                </button>
+                                            <tr class="border-b border-slate-100 hover:bg-slate-50">
+                                                <td class="p-3">${idx+1}</td>
+                                                <td class="p-3 font-mono text-xs">${item.code}</td>
+                                                <td class="p-3 font-medium">${item.product}</td>
+                                                <td class="p-3 text-green-600 font-medium">+${item.qty} pcs</td>
+                                                <td class="p-3">${item.date}</td>
+                                                <td class="p-3">
+                                                    <span class="status-badge status-${item.status}">
+                                                        ${item.status === 'approved' ? 'Disetujui' : (item.status === 'pending' ? 'Pending' : 'Ditolak')}
+                                                    </span>
+                                                </td>
+                                                <td class="p-3">
+                                                    <button onclick="viewDetail('penerimaan', ${item.id})" class="text-indigo-600 hover:text-indigo-800 mr-2">
+                                                        <i class="fas fa-eye"></i>
+                                                    </button>
+                                                    ${item.status === 'pending' ? `
                                             ` : ''}
-                                            </td>
-                                        </tr>
-                                    `).join('')}
+                                                </td>
+                                            </tr>
+                                        `).join('')}
                             </tbody>
                         </table>
                     </div>
@@ -902,33 +903,27 @@
                             </thead>
                             <tbody>
                                 ${outgoingTransactions.map((item, idx) => `
-                                        <tr class="border-b border-slate-100 hover:bg-slate-50">
-                                            <td class="p-3">${idx+1}</td>
-                                            <td class="p-3 font-mono text-xs">${item.code}</td>
-                                            <td class="p-3 font-medium">${item.product}</td>
-                                            <td class="p-3 text-red-600 font-medium">-${item.qty} pcs</td>
-                                            <td class="p-3">${item.destination}</td>
-                                            <td class="p-3">${item.date}</td>
-                                            <td class="p-3">
-                                                <span class="status-badge status-${item.status}">
-                                                    ${item.status === 'approved' ? 'Disetujui' : (item.status === 'pending' ? 'Pending' : 'Ditolak')}
-                                                </span>
-                                            </td>
-                                            <td class="p-3">
-                                                <button onclick="viewDetail('pengeluaran', ${item.id})" class="text-indigo-600 hover:text-indigo-800 mr-2">
-                                                    <i class="fas fa-eye"></i>
-                                                </button>
-                                                ${item.status === 'pending' ? `
-                                                <button onclick="approveItem('pengeluaran', ${item.id})" class="text-green-600 hover:text-green-800 mr-2">
-                                                    <i class="fas fa-check-circle"></i>
-                                                </button>
-                                                <button onclick="rejectItem('pengeluaran', ${item.id})" class="text-red-600 hover:text-red-800">
-                                                    <i class="fas fa-times-circle"></i>
-                                                </button>
+                                            <tr class="border-b border-slate-100 hover:bg-slate-50">
+                                                <td class="p-3">${idx+1}</td>
+                                                <td class="p-3 font-mono text-xs">${item.code}</td>
+                                                <td class="p-3 font-medium">${item.product}</td>
+                                                <td class="p-3 text-red-600 font-medium">-${item.qty} pcs</td>
+                                                <td class="p-3">${item.destination}</td>
+                                                <td class="p-3">${item.date}</td>
+                                                <td class="p-3">
+                                                    <span class="status-badge status-${item.status}">
+                                                        ${item.status === 'approved' ? 'Disetujui' : (item.status === 'pending' ? 'Pending' : 'Ditolak')}
+                                                    </span>
+                                                </td>
+                                                <td class="p-3">
+                                                    <button onclick="viewDetail('pengeluaran', ${item.id})" class="text-indigo-600 hover:text-indigo-800 mr-2">
+                                                        <i class="fas fa-eye"></i>
+                                                    </button>
+                                                    ${item.status === 'pending' ? `
                                             ` : ''}
-                                            </td>
-                                        </tr>
-                                    `).join('')}
+                                                </td>
+                                            </tr>
+                                        `).join('')}
                             </tbody>
                         </table>
                     </div>
@@ -1024,28 +1019,28 @@
                                 ${adjustments.map((item, idx) => {
                                     const change = item.newStock - item.oldStock;
                                     return `
-                                            <tr class="border-b border-slate-100 hover:bg-slate-50">
-                                                <td class="p-3">${idx+1}</td>
-                                                <td class="p-3">${item.date}</td>
-                                                <td class="p-3 font-medium">${item.product}</td>
-                                                <td class="p-3">${item.oldStock} ${item.unit}</td>
-                                                <td class="p-3 font-bold ${change > 0 ? 'text-green-600' : 'text-red-600'}">
-                                                    ${item.newStock} ${item.unit}
-                                                </td>
-                                                <td class="p-3 ${change > 0 ? 'text-green-600' : 'text-red-600'}">
-                                                    ${change > 0 ? '+' : ''}${change} ${item.unit}
-                                                </td>
-                                                <td class="p-3">${item.reason}</td>
-                                                <td class="p-3">
-                                                    <span class="status-badge status-${item.status}">
-                                                        ${item.status === 'approved' ? 'Disetujui' : (item.status === 'draft' ? 'Draft' : 'Ditolak')}
-                                                    </span>
-                                                </td>
-                                                <td class="p-3">
-                                                    <button onclick="viewDetail('penyesuaian', ${item.id})" class="text-indigo-600 hover:text-indigo-800 mr-2">
-                                                        <i class="fas fa-eye"></i>
-                                                    </button>
-                                                    ${item.status === 'draft' ? `
+                                                <tr class="border-b border-slate-100 hover:bg-slate-50">
+                                                    <td class="p-3">${idx+1}</td>
+                                                    <td class="p-3">${item.date}</td>
+                                                    <td class="p-3 font-medium">${item.product}</td>
+                                                    <td class="p-3">${item.oldStock} ${item.unit}</td>
+                                                    <td class="p-3 font-bold ${change > 0 ? 'text-green-600' : 'text-red-600'}">
+                                                        ${item.newStock} ${item.unit}
+                                                    </td>
+                                                    <td class="p-3 ${change > 0 ? 'text-green-600' : 'text-red-600'}">
+                                                        ${change > 0 ? '+' : ''}${change} ${item.unit}
+                                                    </td>
+                                                    <td class="p-3">${item.reason}</td>
+                                                    <td class="p-3">
+                                                        <span class="status-badge status-${item.status}">
+                                                            ${item.status === 'approved' ? 'Disetujui' : (item.status === 'draft' ? 'Draft' : 'Ditolak')}
+                                                        </span>
+                                                    </td>
+                                                    <td class="p-3">
+                                                        <button onclick="viewDetail('penyesuaian', ${item.id})" class="text-indigo-600 hover:text-indigo-800 mr-2">
+                                                            <i class="fas fa-eye"></i>
+                                                        </button>
+                                                        ${item.status === 'draft' ? `
                                                     <button onclick="submitAdjustment(${item.id})" class="text-green-600 hover:text-green-800 mr-2">
                                                         <i class="fas fa-paper-plane"></i>
                                                     </button>
@@ -1053,9 +1048,9 @@
                                                         <i class="fas fa-trash"></i>
                                                     </button>
                                                 ` : ''}
-                                                </td>
-                                            </tr>
-                                        `;
+                                                    </td>
+                                                </tr>
+                                            `;
                                 }).join('')}
                             </tbody>
                         </table>
@@ -1150,22 +1145,22 @@
                             </thead>
                             <tbody>
                                 ${stockReport.map((item, idx) => `
-                                        <tr class="border-b border-slate-100">
-                                            <td class="p-3">${idx+1}</td>
-                                            <td class="p-3 font-medium">${item.product}</td>
-                                            <td class="p-3">${item.category}</td>
-                                            <td class="p-3">${item.awal} pcs</td>
-                                            <td class="p-3 text-green-600">+${item.masuk} pcs</td>
-                                            <td class="p-3 text-red-600">-${item.keluar} pcs</td>
-                                            <td class="p-3">0 pcs</td>
-                                            <td class="p-3 font-bold">${item.akhir} pcs</td>
-                                            <td class="p-3">
-                                                ${item.akhir < item.minStock ? 
-                                                    '<span class="status-badge status-pending">Stok Menipis</span>' : 
-                                                    '<span class="status-badge status-approved">Normal</span>'}
-                                            </td>
-                                        </tr>
-                                    `).join('')}
+                                            <tr class="border-b border-slate-100">
+                                                <td class="p-3">${idx+1}</td>
+                                                <td class="p-3 font-medium">${item.product}</td>
+                                                <td class="p-3">${item.category}</td>
+                                                <td class="p-3">${item.awal} pcs</td>
+                                                <td class="p-3 text-green-600">+${item.masuk} pcs</td>
+                                                <td class="p-3 text-red-600">-${item.keluar} pcs</td>
+                                                <td class="p-3">0 pcs</td>
+                                                <td class="p-3 font-bold">${item.akhir} pcs</td>
+                                                <td class="p-3">
+                                                    ${item.akhir < item.minStock ? 
+                                                        '<span class="status-badge status-pending">Stok Menipis</span>' : 
+                                                        '<span class="status-badge status-approved">Normal</span>'}
+                                                </td>
+                                            </tr>
+                                        `).join('')}
                             </tbody>
                             <tfoot class="bg-slate-100 font-semibold">
                                 <tr>
@@ -1272,25 +1267,25 @@
                             </thead>
                             <tbody>
                                 ${historyTransactions.map((item, idx) => `
-                                        <tr class="border-b border-slate-100">
-                                            <td class="p-3">${idx+1}</td>
-                                            <td class="p-3 font-mono text-xs">${item.id}</td>
-                                            <td class="p-3">
-                                                <span class="px-2 py-1 rounded text-xs ${item.type === 'Penerimaan' ? 'bg-green-100 text-green-700' : (item.type === 'Pengeluaran' ? 'bg-red-100 text-red-700' : 'bg-blue-100 text-blue-700')}">
-                                                    ${item.type}
-                                                </span>
-                                            </td>
-                                            <td class="p-3 font-medium">${item.product}</td>
-                                            <td class="p-3 ${item.qty.startsWith('+') ? 'text-green-600' : 'text-red-600'}">${item.qty} pcs</td>
-                                            <td class="p-3">${item.date}</td>
-                                            <td class="p-3">${item.user}</td>
-                                            <td class="p-3">
-                                                <span class="status-badge status-${item.status}">
-                                                    ${item.status === 'approved' ? 'Disetujui' : 'Pending'}
-                                                </span>
-                                            </td>
-                                        </tr>
-                                    `).join('')}
+                                            <tr class="border-b border-slate-100">
+                                                <td class="p-3">${idx+1}</td>
+                                                <td class="p-3 font-mono text-xs">${item.id}</td>
+                                                <td class="p-3">
+                                                    <span class="px-2 py-1 rounded text-xs ${item.type === 'Penerimaan' ? 'bg-green-100 text-green-700' : (item.type === 'Pengeluaran' ? 'bg-red-100 text-red-700' : 'bg-blue-100 text-blue-700')}">
+                                                        ${item.type}
+                                                    </span>
+                                                </td>
+                                                <td class="p-3 font-medium">${item.product}</td>
+                                                <td class="p-3 ${item.qty.startsWith('+') ? 'text-green-600' : 'text-red-600'}">${item.qty} pcs</td>
+                                                <td class="p-3">${item.date}</td>
+                                                <td class="p-3">${item.user}</td>
+                                                <td class="p-3">
+                                                    <span class="status-badge status-${item.status}">
+                                                        ${item.status === 'approved' ? 'Disetujui' : 'Pending'}
+                                                    </span>
+                                                </td>
+                                            </tr>
+                                        `).join('')}
                             </tbody>
                         </table>
                     </div>
