@@ -1,11 +1,13 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\LoginController;
 
 // Route untuk halaman splash (jika ada)
 Route::get('/', function () {
     return view('splash');
 });
+Route::post('/login', [LoginController::class, 'login']);
 
 // Route untuk login
 Route::get('/login', function () {
