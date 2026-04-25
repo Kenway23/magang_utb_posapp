@@ -1,18 +1,18 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\LoginController;
 
-//Login
+// Route untuk halaman splash (jika ada)
 Route::get('/', function () {
     return view('splash');
 });
-Route::post('/login', [LoginController::class, 'login']);
 
+// Route untuk login
 Route::get('/login', function () {
     return view('auth.login');
 })->name('login');
 
+// Route untuk Owner
 Route::prefix('owner')->name('owner.')->group(function () {
     Route::get('/dashboard', function () {
         return view('owner.d_owner');
@@ -42,19 +42,23 @@ Route::prefix('owner')->name('owner.')->group(function () {
         })->name('laporan');
     });
 
+    // Halaman Riwayat Transaksi
     Route::get('/riwayat-transaksi', function () {
         return view('owner.riwayat_transaksi');
     })->name('riwayat_transaksi');
 
+    // Halaman Laporan Penjualan
     Route::get('/laporan-penjualan', function () {
         return view('owner.laporan_penjualan');
     })->name('laporan_penjualan');
 
+    // Halaman Pengguna
     Route::get('/pengguna', function () {
         return view('owner.pengguna');
     })->name('pengguna');
 });
 
+// Route untuk Kasir
 Route::prefix('kasir')->name('kasir.')->group(function () {
     Route::get('/dashboard', function () {
         return view('kasir.d_kasir');
@@ -69,6 +73,7 @@ Route::prefix('kasir')->name('kasir.')->group(function () {
     })->name('laporan');
 });
 
+//Route untuk Gudang
 Route::prefix('gudang')->name('gudang.')->group(function () {
     // Dashboard Gudang
     Route::get('/dashboard', function () {
