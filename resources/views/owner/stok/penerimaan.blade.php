@@ -1,130 +1,126 @@
 @extends('layouts.owner')
 
-@section('title', 'Penerimaan Stok - PROShop')
+@section('title', 'Approval Penerimaan Stok - PROShop')
 
-@section('header-title', 'Penerimaan Stok')
-@section('header-subtitle', 'Catat penerimaan stok barang baru')
+@section('header-title', 'Approval Penerimaan Stok')
+@section('header-subtitle', 'Setujui atau tolak pengajuan penerimaan stok dari gudang')
 
 @section('content')
-    <div class="space-y-6">
-        {{-- Form Penerimaan Stok --}}
-        <div class="bg-white rounded-2xl shadow-md overflow-hidden border border-slate-100">
-            <div class="px-6 py-4 border-b border-slate-100 bg-gradient-to-r from-indigo-50 to-white">
-                <h3 class="font-semibold text-slate-800 flex items-center gap-2">
-                    <i class="fas fa-arrow-down text-green-600"></i>
-                    Form Penerimaan Stok
-                </h3>
-            </div>
-            <div class="p-6">
-                <form class="space-y-4">
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div>
-                            <label class="block text-sm font-medium text-slate-700 mb-1">Nama Produk</label>
-                            <select
-                                class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500">
-                                <option>Pilih Produk</option>
-                                <option>Sunlight 690ml</option>
-                                <option>Tolak Angin</option>
-                                <option>Rinso Bubuk</option>
-                                <option>Kayu Putih</option>
-                                <option>Japota Honey</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-slate-700 mb-1">Jumlah</label>
-                            <input type="number" placeholder="Masukkan jumlah"
-                                class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500">
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-slate-700 mb-1">Tanggal</label>
-                            <input type="date"
-                                class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500">
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-slate-700 mb-1">Supplier</label>
-                            <input type="text" placeholder="Nama supplier"
-                                class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500">
-                        </div>
-                        <div class="md:col-span-2">
-                            <label class="block text-sm font-medium text-slate-700 mb-1">Catatan</label>
-                            <textarea rows="3" placeholder="Catatan tambahan..."
-                                class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"></textarea>
-                        </div>
-                    </div>
-                    <div class="flex justify-end gap-3">
-                        <button type="reset"
-                            class="px-4 py-2 border border-slate-300 rounded-lg text-slate-700 hover:bg-slate-50 transition">Reset</button>
-                        <button type="submit"
-                            class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition flex items-center gap-2">
-                            <i class="fas fa-save"></i> Simpan Penerimaan
-                        </button>
-                    </div>
-                </form>
-            </div>
+<div class="space-y-6">
+    <div class="bg-white rounded-2xl shadow-md overflow-hidden border border-slate-100">
+        <div class="px-6 py-4 border-b border-slate-100 bg-gradient-to-r from-indigo-50 to-white">
+            <h3 class="font-semibold text-slate-800 flex items-center gap-2">
+                <i class="fas fa-clipboard-list text-indigo-600"></i>
+                Daftar Pengajuan Penerimaan Stok
+            </h3>
+            <p class="text-sm text-slate-500 mt-1">Dari Staff Gudang</p>
         </div>
-
-        {{-- Riwayat Penerimaan Stok --}}
-        <div class="bg-white rounded-2xl shadow-md overflow-hidden border border-slate-100">
-            <div class="px-6 py-4 border-b border-slate-100 flex justify-between items-center">
-                <h3 class="font-semibold text-slate-800 flex items-center gap-2">
-                    <i class="fas fa-history text-indigo-600"></i>
-                    Riwayat Penerimaan Stok
-                </h3>
-                <div class="relative">
-                    <input type="text" placeholder="Cari..."
-                        class="pl-10 pr-4 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 w-64">
-                    <i class="fas fa-search absolute left-3 top-3 text-slate-400 text-sm"></i>
-                </div>
-            </div>
-            <div class="overflow-x-auto">
-                <table class="min-w-full divide-y divide-slate-200">
-                    <thead class="bg-slate-50">
-                        <tr>
-                            <th class="px-6 py-3 text-left text-xs font-semibold text-slate-500 uppercase">Tanggal</th>
-                            <th class="px-6 py-3 text-left text-xs font-semibold text-slate-500 uppercase">Produk</th>
-                            <th class="px-6 py-3 text-left text-xs font-semibold text-slate-500 uppercase">Jumlah</th>
-                            <th class="px-6 py-3 text-left text-xs font-semibold text-slate-500 uppercase">Supplier</th>
-                            <th class="px-6 py-3 text-left text-xs font-semibold text-slate-500 uppercase">Status</th>
-                            <th class="px-6 py-3 text-left text-xs font-semibold text-slate-500 uppercase">Aksi</th>
-                        </tr>
-                    </thead>
-                    <tbody class="divide-y divide-slate-100">
-                        <tr class="hover:bg-slate-50 transition">
-                            <td class="px-6 py-3 text-sm text-slate-600">24/04/2026</td>
-                            <td class="px-6 py-3 text-sm font-medium text-slate-700">Sunlight 690ml</td>
-                            <td class="px-6 py-3 text-sm text-green-600 font-semibold">+50</td>
-                            <td class="px-6 py-3 text-sm text-slate-600">PT. Unilever</td>
-                            <td class="px-6 py-3"><span
-                                    class="px-2 py-1 text-xs rounded-full bg-green-100 text-green-700"><i
-                                        class="fas fa-check-circle mr-1"></i>Selesai</span></td>
-                            <td class="px-6 py-3"><button class="text-indigo-600 hover:text-indigo-800"><i
-                                        class="fas fa-print"></i></button></td>
-                        </tr>
-                        <tr class="hover:bg-slate-50 transition">
-                            <td class="px-6 py-3 text-sm text-slate-600">23/04/2026</td>
-                            <td class="px-6 py-3 text-sm font-medium text-slate-700">Tolak Angin</td>
-                            <td class="px-6 py-3 text-sm text-green-600 font-semibold">+30</td>
-                            <td class="px-6 py-3 text-sm text-slate-600">PT. Sido Muncul</td>
-                            <td class="px-6 py-3"><span
-                                    class="px-2 py-1 text-xs rounded-full bg-green-100 text-green-700"><i
-                                        class="fas fa-check-circle mr-1"></i>Selesai</span></td>
-                            <td class="px-6 py-3"><button class="text-indigo-600 hover:text-indigo-800"><i
-                                        class="fas fa-print"></i></button></td>
-                        </tr>
-                        <tr class="hover:bg-slate-50 transition">
-                            <td class="px-6 py-3 text-sm text-slate-600">22/04/2026</td>
-                            <td class="px-6 py-3 text-sm font-medium text-slate-700">Pocky Coklat</td>
-                            <td class="px-6 py-3 text-sm text-green-600 font-semibold">+100</td>
-                            <td class="px-6 py-3 text-sm text-slate-600">PT. Ezaki Glico</td>
-                            <td class="px-6 py-3"><span
-                                    class="px-2 py-1 text-xs rounded-full bg-green-100 text-green-700"><i
-                                        class="fas fa-check-circle mr-1"></i>Selesai</span></td>
-                            <td class="px-6 py-3"><button class="text-indigo-600 hover:text-indigo-800"><i
-                                        class="fas fa-print"></i></button></td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
+        <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-slate-200">
+                <thead class="bg-slate-50">
+                    <tr>
+                        <th class="px-6 py-3 text-left text-xs font-semibold text-slate-500 uppercase">Tgl Pengajuan</th>
+                        <th class="px-6 py-3 text-left text-xs font-semibold text-slate-500 uppercase">Produk</th>
+                        <th class="px-6 py-3 text-left text-xs font-semibold text-slate-500 uppercase">Jumlah</th>
+                        <th class="px-6 py-3 text-left text-xs font-semibold text-slate-500 uppercase">Supplier</th>
+                        <th class="px-6 py-3 text-left text-xs font-semibold text-slate-500 uppercase">Tgl Terima</th>
+                        <th class="px-6 py-3 text-left text-xs font-semibold text-slate-500 uppercase">Status</th>
+                        <th class="px-6 py-3 text-left text-xs font-semibold text-slate-500 uppercase">Aksi</th>
+                    </tr>
+                </thead>
+                <tbody id="tableApprovalPenerimaan">
+                    <tr class="text-center text-slate-500">
+                        <td colspan="7" class="px-6 py-8">
+                            <i class="fas fa-inbox text-4xl mb-2 block"></i>
+                            Tidak ada pengajuan
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
         </div>
     </div>
+</div>
+
+<script>
+    // Ambil data dari localStorage (yg dikirim gudang)
+    let pengajuanPenerimaan = JSON.parse(localStorage.getItem('pengajuanPenerimaan') || '[]');
+    
+    function renderApprovalPenerimaan() {
+        const tbody = document.getElementById('tableApprovalPenerimaan');
+        const pendingItems = pengajuanPenerimaan.filter(item => item.status === 'pending');
+        
+        if (pendingItems.length === 0) {
+            tbody.innerHTML = `<tr class="text-center text-slate-500">
+                <td colspan="7" class="px-6 py-8">
+                    <i class="fas fa-check-circle text-4xl mb-2 block text-green-500"></i>
+                    Semua pengajuan sudah diproses
+                </td>
+            </tr>`;
+            return;
+        }
+        
+        tbody.innerHTML = pendingItems.map(item => `
+            <tr class="hover:bg-slate-50 transition">
+                <td class="px-6 py-3 text-sm text-slate-600">${item.tanggalPengajuan}</td>
+                <td class="px-6 py-3 text-sm font-medium text-slate-700">${item.produk}</td>
+                <td class="px-6 py-3 text-sm text-green-600 font-semibold">+${item.jumlah}</td>
+                <td class="px-6 py-3 text-sm text-slate-600">${item.supplier}</td>
+                <td class="px-6 py-3 text-sm text-slate-600">${item.tanggal}</td>
+                <td class="px-6 py-3">
+                    <span class="px-2 py-1 text-xs rounded-full bg-yellow-100 text-yellow-700">
+                        <i class="fas fa-clock mr-1"></i>Menunggu
+                    </span>
+                </td>
+                <td class="px-6 py-3">
+                    <div class="flex gap-2">
+                        <button onclick="approvePenerimaan(${item.id})" 
+                            class="px-3 py-1 bg-green-600 text-white rounded-lg hover:bg-green-700 text-sm flex items-center gap-1">
+                            <i class="fas fa-check"></i> Setuju
+                        </button>
+                        <button onclick="rejectPenerimaan(${item.id})" 
+                            class="px-3 py-1 bg-red-600 text-white rounded-lg hover:bg-red-700 text-sm flex items-center gap-1">
+                            <i class="fas fa-times"></i> Tolak
+                        </button>
+                    </div>
+                </td>
+            </tr>
+        `).join('');
+    }
+    
+    function approvePenerimaan(id) {
+        if (confirm('Setujui pengajuan penerimaan ini?')) {
+            const index = pengajuanPenerimaan.findIndex(i => i.id === id);
+            if (index !== -1) {
+                pengajuanPenerimaan[index].status = 'approved';
+                pengajuanPenerimaan[index].disetujuiPada = new Date().toLocaleString('id-ID');
+                localStorage.setItem('pengajuanPenerimaan', JSON.stringify(pengajuanPenerimaan));
+                renderApprovalPenerimaan();
+                alert('Pengajuan DISETUJUI! Stok akan ditambahkan.');
+            }
+        }
+    }
+    
+    function rejectPenerimaan(id) {
+        const alasan = prompt('Masukkan alasan penolakan:');
+        if (alasan !== null) {
+            const index = pengajuanPenerimaan.findIndex(i => i.id === id);
+            if (index !== -1) {
+                pengajuanPenerimaan[index].status = 'rejected';
+                pengajuanPenerimaan[index].alasanTolak = alasan;
+                pengajuanPenerimaan[index].ditolakPada = new Date().toLocaleString('id-ID');
+                localStorage.setItem('pengajuanPenerimaan', JSON.stringify(pengajuanPenerimaan));
+                renderApprovalPenerimaan();
+                alert(`Pengajuan DITOLAK dengan alasan: ${alasan}`);
+            }
+        }
+    }
+    
+    // Refresh data setiap 2 detik (simulasi realtime)
+    setInterval(() => {
+        pengajuanPenerimaan = JSON.parse(localStorage.getItem('pengajuanPenerimaan') || '[]');
+        renderApprovalPenerimaan();
+    }, 2000);
+    
+    renderApprovalPenerimaan();
+</script>
 @endsection

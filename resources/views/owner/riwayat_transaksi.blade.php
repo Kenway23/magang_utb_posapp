@@ -56,7 +56,7 @@
         </div>
 
         {{-- Statistik Ringkasan --}}
-        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div class="bg-white rounded-2xl shadow-md p-4 border border-slate-100">
                 <p class="text-slate-500 text-sm">Total Transaksi</p>
                 <p class="text-2xl font-bold text-indigo-600" id="totalTransaksiCount">0</p>
@@ -68,10 +68,6 @@
             <div class="bg-white rounded-2xl shadow-md p-4 border border-slate-100">
                 <p class="text-slate-500 text-sm">Total Pendapatan</p>
                 <p class="text-2xl font-bold text-green-600" id="totalPendapatan">Rp 0</p>
-            </div>
-            <div class="bg-white rounded-2xl shadow-md p-4 border border-slate-100">
-                <p class="text-slate-500 text-sm">Rata-rata Transaksi</p>
-                <p class="text-2xl font-bold text-purple-600" id="rataRataTransaksi">Rp 0</p>
             </div>
         </div>
 

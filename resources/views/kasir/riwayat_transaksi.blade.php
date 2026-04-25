@@ -8,7 +8,7 @@
     <div x-data="riwayatApp()" x-init="init()" x-cloak>
         <div class="space-y-6">
             <!-- Statistik -->
-            <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div class="bg-white rounded-xl shadow-sm p-4 border-l-4 border-indigo-500">
                     <p class="text-sm text-gray-500">Total Transaksi</p>
                     <p class="text-2xl font-bold text-indigo-600" x-text="totalTransaksi"></p>
@@ -20,10 +20,6 @@
                 <div class="bg-white rounded-xl shadow-sm p-4 border-l-4 border-green-500">
                     <p class="text-sm text-gray-500">Total Pendapatan</p>
                     <p class="text-2xl font-bold text-green-600">Rp <span x-text="formatPrice(totalPendapatan)"></span></p>
-                </div>
-                <div class="bg-white rounded-xl shadow-sm p-4 border-l-4 border-purple-500">
-                    <p class="text-sm text-gray-500">Rata-rata Transaksi</p>
-                    <p class="text-2xl font-bold text-purple-600">Rp <span x-text="formatPrice(rataRata)"></span></p>
                 </div>
             </div>
 

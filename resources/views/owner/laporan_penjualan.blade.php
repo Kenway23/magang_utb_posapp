@@ -59,7 +59,7 @@
         </div>
 
         {{-- Statistik Ringkasan --}}
-        <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
             <div class="bg-white rounded-2xl shadow-md p-6 card-hover border border-slate-100">
                 <div class="flex justify-between items-start">
                     <div>
@@ -93,18 +93,6 @@
                     </div>
                     <div class="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center">
                         <i class="fas fa-boxes text-blue-600 text-xl"></i>
-                    </div>
-                </div>
-            </div>
-            <div class="bg-white rounded-2xl shadow-md p-6 card-hover border border-slate-100">
-                <div class="flex justify-between items-start">
-                    <div>
-                        <p class="text-slate-500 text-sm">Rata-rata Transaksi</p>
-                        <p class="text-3xl font-bold text-purple-600" id="rataTransaksi">Rp 0</p>
-                        <p class="text-xs text-slate-400 mt-2">Per transaksi</p>
-                    </div>
-                    <div class="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center">
-                        <i class="fas fa-chart-line text-purple-600 text-xl"></i>
                     </div>
                 </div>
             </div>

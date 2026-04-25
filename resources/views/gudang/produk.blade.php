@@ -1,4 +1,4 @@
-@extends('layouts.kasir')
+@extends('layouts.gudang')
 
 @section('title', 'Manajemen Produk - PROShop')
 @section('header-title', 'Manajemen Produk')
