@@ -2,7 +2,7 @@
 
 @section('title', 'PROShop - Dashboard Gudang')
 
-@section('content')
+@section('content')z
     <!-- Konten sama seperti di atas karena sudah di-handle oleh JavaScript -->
     <!-- File ini hanya sebagai placeholder, konten utama di-handle oleh JavaScript di layout -->
     <div id="dynamic-content">
