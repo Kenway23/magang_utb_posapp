@@ -23,4 +23,12 @@ class Produk extends Model
     {
         return $this->belongsTo(Kategori::class, 'kategori_id');
     }
+    public function stokMasuks()
+    {
+        return $this->hasMany(StokMasuk::class);
+    }
+    public function produk()
+    {
+        return $this->belongsTo(Produk::class);
+    }
 }
