@@ -1,13 +1,101 @@
 @extends('layouts.kasir')
 
-@section('title', 'Beranda - PROShop Kasir')
-@section('header-title', 'Beranda')
-@section('header-subtitle', 'Selamat bekerja!')
+@section('title', 'Dashboard & POS - PROShop Kasir')
+@section('header-title', 'Dashboard & Point of Sale')
+@section('header-subtitle', 'Ringkasan aktivitas dan transaksi penjualan')
 
 @section('content')
     <div x-data="posApp()" x-init="init()" x-cloak>
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <style>
+            [x-cloak] {
+                display: none !important;
+            }
 
+            .toast-notification {
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                z-index: 9999;
+                min-width: 320px;
+                max-width: 400px;
+                background: white;
+                border-radius: 12px;
+                box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+                overflow: hidden;
+                transform: translateX(400px);
+                transition: transform 0.3s ease;
+            }
+
+            .toast-notification.show {
+                transform: translateX(0);
+            }
+
+            .toast-success {
+                border-left: 4px solid #10b981;
+            }
+
+            .toast-error {
+                border-left: 4px solid #ef4444;
+            }
+
+            .toast-warning {
+                border-left: 4px solid #f59e0b;
+            }
+
+            .toast-info {
+                border-left: 4px solid #3b82f6;
+            }
+        </style>
+
+        <!-- STATISTIK CARD (Dashboard) -->
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-5 mb-6">
+            <div class="bg-white rounded-xl shadow-sm p-5 border-l-4 border-indigo-500">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-slate-500 text-sm">Transaksi Hari Ini</p>
+                        <p class="text-2xl font-bold text-indigo-600" x-text="transaksiHariIni">0</p>
+                    </div>
+                    <div class="w-10 h-10 bg-indigo-100 rounded-full flex items-center justify-center">
+                        <i class="fas fa-receipt text-indigo-500 text-lg"></i>
+                    </div>
+                </div>
+            </div>
+            <div class="bg-white rounded-xl shadow-sm p-5 border-l-4 border-emerald-500">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-slate-500 text-sm">Pendapatan Hari Ini</p>
+                        <p class="text-2xl font-bold text-emerald-600" x-text="formatPrice(pendapatanHariIni)">Rp 0</p>
+                    </div>
+                    <div class="w-10 h-10 bg-emerald-100 rounded-full flex items-center justify-center">
+                        <i class="fas fa-money-bill-wave text-emerald-500 text-lg"></i>
+                    </div>
+                </div>
+            </div>
+            <div class="bg-white rounded-xl shadow-sm p-5 border-l-4 border-blue-500">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-slate-500 text-sm">Produk Tersedia</p>
+                        <p class="text-2xl font-bold text-blue-600" x-text="products.length">0</p>
+                    </div>
+                    <div class="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
+                        <i class="fas fa-boxes text-blue-500 text-lg"></i>
+                    </div>
+                </div>
+            </div>
+            <div class="bg-white rounded-xl shadow-sm p-5 border-l-4 border-purple-500">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-slate-500 text-sm">Item di Keranjang</p>
+                        <p class="text-2xl font-bold text-purple-600" x-text="cart.length">0</p>
+                    </div>
+                    <div class="w-10 h-10 bg-purple-100 rounded-full flex items-center justify-center">
+                        <i class="fas fa-shopping-cart text-purple-500 text-lg"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
             <!-- KOLOM KIRI: PRODUK -->
             <div class="lg:col-span-2">
                 <div class="bg-white rounded-xl shadow-sm">
@@ -27,7 +115,7 @@
                     <!-- FILTER KATEGORI -->
                     <div class="p-4 border-b bg-gray-50">
                         <div class="flex flex-wrap gap-2">
-                            <template x-for="cat in categories" :key="cat.name">
+                            <template x-for="cat in categories" :key="cat.id">
                                 <button @click="selectedCategory = cat.name; filterProducts()"
                                     :class="selectedCategory === cat.name ? cat.color + ' text-white' :
                                         'bg-gray-200 text-gray-700 hover:bg-gray-300'"
@@ -46,23 +134,20 @@
                                 class="border rounded-xl p-4 cursor-pointer hover:shadow-md hover:scale-[1.02] transition-all duration-200 bg-white"
                                 :class="product.borderColor">
                                 <div class="flex items-start gap-3">
-                                    <!-- Icon dengan warna kategori -->
                                     <div class="w-12 h-12 rounded-xl flex items-center justify-center"
                                         :class="product.bgColor">
                                         <i class="fas fa-box text-white text-xl"></i>
                                     </div>
-                                    <!-- Info Produk -->
                                     <div class="flex-1">
                                         <div class="font-bold text-slate-700" x-text="product.name"></div>
                                         <div class="text-2xl font-bold mt-1" :class="product.priceColor">
-                                            Rp <span x-text="formatPrice(product.price || 0)"></span>
+                                            Rp <span x-text="formatPrice(product.price)"></span>
                                         </div>
                                         <div class="text-xs text-gray-400 mt-1">
-                                            Stok: <span x-text="product.stock || 0"></span>
-                                            <span x-show="(product.stock || 0) <= 5" class="text-red-500 ml-1">⚠️</span>
+                                            Stok: <span x-text="product.stock"></span>
+                                            <span x-show="product.stock <= 5" class="text-red-500 ml-1">⚠️</span>
                                         </div>
                                     </div>
-                                    <!-- SIMBOL KATEGORI DI KANAN ATAS (bukan tombol keranjang) -->
                                     <div>
                                         <span class="text-xs px-2 py-1 rounded-full text-white" :class="product.badgeColor"
                                             x-text="product.categoryIcon"></span>
@@ -106,9 +191,9 @@
                                 <div class="flex-1">
                                     <div class="font-medium text-sm" x-text="item.name"></div>
                                     <div class="text-sm font-bold text-indigo-600">Rp <span
-                                            x-text="formatPrice(item.price || 0)"></span></div>
+                                            x-text="formatPrice(item.price)"></span></div>
                                     <div class="text-xs text-gray-400">x <span x-text="item.qty"></span> = Rp <span
-                                            x-text="formatPrice((item.price || 0) * item.qty)"></span></div>
+                                            x-text="formatPrice(item.price * item.qty)"></span></div>
                                 </div>
                                 <div class="flex items-center gap-2">
                                     <button @click="updateQty(idx, item.qty - 1)"
@@ -219,6 +304,28 @@
                 </div>
             </div>
         </div>
+
+        <!-- LOADING MODAL -->
+        <div x-show="showLoadingModal" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50" x-cloak>
+            <div class="bg-white rounded-xl max-w-xs w-full mx-4 p-6 text-center">
+                <div
+                    class="w-12 h-12 border-4 border-indigo-200 border-t-indigo-600 rounded-full animate-spin mx-auto mb-3">
+                </div>
+                <p class="text-slate-600" x-text="loadingMessage">Memproses...</p>
+            </div>
+        </div>
+
+        <!-- TOAST NOTIFICATION -->
+        <div id="toastNotification" class="toast-notification">
+            <div class="flex items-center p-4">
+                <div id="toastIcon" class="flex-shrink-0 mr-3"><i class="fas fa-check-circle text-xl"></i></div>
+                <div class="flex-1">
+                    <p id="toastMessage" class="text-sm font-medium text-slate-800"></p>
+                </div>
+                <button onclick="hideToast()" class="flex-shrink-0 ml-3 text-slate-400 hover:text-slate-600"><i
+                        class="fas fa-times"></i></button>
+            </div>
+        </div>
     </div>
 
     <script>
@@ -226,112 +333,41 @@
             return {
                 products: [],
                 filteredProducts: [],
+                categories: [],
                 searchProduct: '',
                 selectedCategory: 'Semua',
-                categories: [{
-                        name: 'Semua',
-                        icon: 'fas fa-th-large',
-                        color: 'bg-gray-600'
-                    },
-                    {
-                        name: 'Makanan',
-                        icon: 'fas fa-utensils',
-                        color: 'bg-red-600'
-                    },
-                    {
-                        name: 'Minuman',
-                        icon: 'fas fa-mug-hot',
-                        color: 'bg-blue-600'
-                    },
-                    {
-                        name: 'Makanan Ringan',
-                        icon: 'fas fa-cookie-bite',
-                        color: 'bg-yellow-600'
-                    },
-                    {
-                        name: 'Produk Kesehatan',
-                        icon: 'fas fa-heartbeat',
-                        color: 'bg-green-600'
-                    },
-                    {
-                        name: 'Produk Kebersihan',
-                        icon: 'fas fa-soap',
-                        color: 'bg-cyan-600'
-                    },
-                    {
-                        name: 'Kebutuhan Harian',
-                        icon: 'fas fa-home',
-                        color: 'bg-purple-600'
-                    },
-                    {
-                        name: 'Makanan Siap Saji',
-                        icon: 'fas fa-hamburger',
-                        color: 'bg-orange-600'
-                    },
-                    {
-                        name: 'Produk Segar & Beku',
-                        icon: 'fas fa-snowflake',
-                        color: 'bg-teal-600'
-                    },
-                    {
-                        name: 'Kebutuhan Ibu & Anak',
-                        icon: 'fas fa-baby-carriage',
-                        color: 'bg-pink-600'
-                    },
-                    {
-                        name: 'Makanan Hewan',
-                        icon: 'fas fa-paw',
-                        color: 'bg-amber-600'
-                    },
-                    {
-                        name: 'Mainan',
-                        icon: 'fas fa-gamepad',
-                        color: 'bg-lime-600'
-                    },
-                    {
-                        name: 'Kecantikan',
-                        icon: 'fas fa-female',
-                        color: 'bg-rose-600'
-                    },
-                    {
-                        name: 'Perawatan Diri',
-                        icon: 'fas fa-spa',
-                        color: 'bg-emerald-600'
-                    }
-                ],
                 cart: [],
                 paymentAmount: 0,
                 paymentAmountFormatted: '',
-                transactions: [],
                 lastTransaction: null,
                 showSuccessModal: false,
                 showCancelModal: false,
+                showLoadingModal: false,
+                loadingMessage: 'Memproses...',
+                loading: false,
+                transaksiHariIni: 0,
+                pendapatanHariIni: 0,
 
                 get cartTotal() {
-                    if (!this.cart.length) return 0;
-                    return this.cart.reduce((sum, item) => sum + ((item.price || 0) * (item.qty || 0)), 0);
+                    return this.cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
                 },
                 get changeAmount() {
-                    return (this.paymentAmount || 0) - this.cartTotal;
+                    return this.paymentAmount - this.cartTotal;
                 },
 
                 formatPrice(price) {
-                    if (price === undefined || price === null || isNaN(price)) return '0';
-                    return new Intl.NumberFormat('id-ID').format(price);
+                    return new Intl.NumberFormat('id-ID').format(price || 0);
                 },
 
                 parseRupiah(str) {
                     if (!str) return 0;
-                    let num = parseInt(str.replace(/\./g, '').replace(/[^0-9]/g, '')) || 0;
-                    return isNaN(num) ? 0 : num;
+                    return parseInt(str.replace(/\./g, '').replace(/[^0-9]/g, '')) || 0;
                 },
 
                 formatPaymentInput(e) {
-                    let value = e.target.value;
-                    let rawNumber = this.parseRupiah(value);
+                    let rawNumber = this.parseRupiah(e.target.value);
                     this.paymentAmount = rawNumber;
                     this.paymentAmountFormatted = this.formatPrice(rawNumber);
-                    e.target.value = this.paymentAmountFormatted;
                 },
 
                 filterProducts() {
@@ -345,277 +381,103 @@
                     this.filteredProducts = filtered;
                 },
 
-                init() {
-                    const categoryColors = {
-                        'Makanan': {
-                            bg: 'bg-red-600',
-                            border: 'border-red-200',
-                            badge: 'bg-red-600',
-                            price: 'text-red-600',
-                            borderTop: 'border-t-red-600',
-                            bgLight: 'bg-red-50',
-                            categoryIcon: '🍚'
-                        },
-                        'Minuman': {
-                            bg: 'bg-blue-600',
-                            border: 'border-blue-200',
-                            badge: 'bg-blue-600',
-                            price: 'text-blue-600',
-                            borderTop: 'border-t-blue-600',
-                            bgLight: 'bg-blue-50',
-                            categoryIcon: '🥤'
-                        },
-                        'Makanan Ringan': {
-                            bg: 'bg-yellow-600',
-                            border: 'border-yellow-200',
-                            badge: 'bg-yellow-600',
-                            price: 'text-yellow-600',
-                            borderTop: 'border-t-yellow-600',
-                            bgLight: 'bg-yellow-50',
-                            categoryIcon: '🍿'
-                        },
-                        'Produk Kesehatan': {
-                            bg: 'bg-green-600',
-                            border: 'border-green-200',
-                            badge: 'bg-green-600',
-                            price: 'text-green-600',
-                            borderTop: 'border-t-green-600',
-                            bgLight: 'bg-green-50',
-                            categoryIcon: '💊'
-                        },
-                        'Produk Kebersihan': {
-                            bg: 'bg-cyan-600',
-                            border: 'border-cyan-200',
-                            badge: 'bg-cyan-600',
-                            price: 'text-cyan-600',
-                            borderTop: 'border-t-cyan-600',
-                            bgLight: 'bg-cyan-50',
-                            categoryIcon: '🧼'
-                        },
-                        'Kebutuhan Harian': {
-                            bg: 'bg-purple-600',
-                            border: 'border-purple-200',
-                            badge: 'bg-purple-600',
-                            price: 'text-purple-600',
-                            borderTop: 'border-t-purple-600',
-                            bgLight: 'bg-purple-50',
-                            categoryIcon: '📦'
-                        },
-                        'Makanan Siap Saji': {
-                            bg: 'bg-orange-600',
-                            border: 'border-orange-200',
-                            badge: 'bg-orange-600',
-                            price: 'text-orange-600',
-                            borderTop: 'border-t-orange-600',
-                            bgLight: 'bg-orange-50',
-                            categoryIcon: '🍔'
-                        },
-                        'Produk Segar & Beku': {
-                            bg: 'bg-teal-600',
-                            border: 'border-teal-200',
-                            badge: 'bg-teal-600',
-                            price: 'text-teal-600',
-                            borderTop: 'border-t-teal-600',
-                            bgLight: 'bg-teal-50',
-                            categoryIcon: '❄️'
-                        },
-                        'Kebutuhan Ibu & Anak': {
-                            bg: 'bg-pink-600',
-                            border: 'border-pink-200',
-                            badge: 'bg-pink-600',
-                            price: 'text-pink-600',
-                            borderTop: 'border-t-pink-600',
-                            bgLight: 'bg-pink-50',
-                            categoryIcon: '👶'
-                        },
-                        'Makanan Hewan': {
-                            bg: 'bg-amber-600',
-                            border: 'border-amber-200',
-                            badge: 'bg-amber-600',
-                            price: 'text-amber-600',
-                            borderTop: 'border-t-amber-600',
-                            bgLight: 'bg-amber-50',
-                            categoryIcon: '🐕'
-                        },
-                        'Mainan': {
-                            bg: 'bg-lime-600',
-                            border: 'border-lime-200',
-                            badge: 'bg-lime-600',
-                            price: 'text-lime-600',
-                            borderTop: 'border-t-lime-600',
-                            bgLight: 'bg-lime-50',
-                            categoryIcon: '🎮'
-                        },
-                        'Kecantikan': {
-                            bg: 'bg-rose-600',
-                            border: 'border-rose-200',
-                            badge: 'bg-rose-600',
-                            price: 'text-rose-600',
-                            borderTop: 'border-t-rose-600',
-                            bgLight: 'bg-rose-50',
-                            categoryIcon: '💄'
-                        },
-                        'Perawatan Diri': {
-                            bg: 'bg-emerald-600',
-                            border: 'border-emerald-200',
-                            badge: 'bg-emerald-600',
-                            price: 'text-emerald-600',
-                            borderTop: 'border-t-emerald-600',
-                            bgLight: 'bg-emerald-50',
-                            categoryIcon: '🧴'
-                        }
-                    };
+                showToast(message, type = 'success') {
+                    const toast = document.getElementById('toastNotification');
+                    const toastIcon = document.getElementById('toastIcon');
+                    const toastMessage = document.getElementById('toastMessage');
+                    toast.className = 'toast-notification';
+                    if (type === 'success') {
+                        toast.classList.add('toast-success');
+                        toastIcon.innerHTML = '<i class="fas fa-check-circle text-emerald-500 text-xl"></i>';
+                    } else if (type === 'error') {
+                        toast.classList.add('toast-error');
+                        toastIcon.innerHTML = '<i class="fas fa-exclamation-circle text-rose-500 text-xl"></i>';
+                    } else if (type === 'warning') {
+                        toast.classList.add('toast-warning');
+                        toastIcon.innerHTML = '<i class="fas fa-exclamation-triangle text-amber-500 text-xl"></i>';
+                    } else {
+                        toast.classList.add('toast-info');
+                        toastIcon.innerHTML = '<i class="fas fa-info-circle text-blue-500 text-xl"></i>';
+                    }
+                    toastMessage.innerHTML = message;
+                    toast.classList.add('show');
+                    setTimeout(() => toast.classList.remove('show'), 3000);
+                },
 
-                    this.products = [{
-                            id: 1,
-                            name: 'Indomie Goreng',
-                            category: 'Makanan',
-                            price: 3800,
-                            stock: 108
-                        },
-                        {
-                            id: 2,
-                            name: 'Indomie Kuah',
-                            category: 'Makanan',
-                            price: 3800,
-                            stock: 75
-                        },
-                        {
-                            id: 3,
-                            name: 'Teh Botol Sosro',
-                            category: 'Minuman',
-                            price: 5000,
-                            stock: 85
-                        },
-                        {
-                            id: 4,
-                            name: 'Aqua 600ml',
-                            category: 'Minuman',
-                            price: 4000,
-                            stock: 120
-                        },
-                        {
-                            id: 5,
-                            name: 'Pocky Coklat',
-                            category: 'Makanan Ringan',
-                            price: 7900,
-                            stock: 80
-                        },
-                        {
-                            id: 6,
-                            name: 'Roma Kelapa',
-                            category: 'Makanan Ringan',
-                            price: 6000,
-                            stock: 65
-                        },
-                        {
-                            id: 7,
-                            name: 'Paracetamol',
-                            category: 'Produk Kesehatan',
-                            price: 5000,
-                            stock: 50
-                        },
-                        {
-                            id: 8,
-                            name: 'Sabun Lifebuoy',
-                            category: 'Produk Kebersihan',
-                            price: 3500,
-                            stock: 45
-                        },
-                        {
-                            id: 9,
-                            name: 'Rinso Bubuk',
-                            category: 'Kebutuhan Harian',
-                            price: 20700,
-                            stock: 100
-                        },
-                        {
-                            id: 10,
-                            name: 'Indomie Cup',
-                            category: 'Makanan Siap Saji',
-                            price: 8000,
-                            stock: 60
-                        },
-                        {
-                            id: 11,
-                            name: 'Daging Sapi Segar',
-                            category: 'Produk Segar & Beku',
-                            price: 120000,
-                            stock: 15
-                        },
-                        {
-                            id: 12,
-                            name: 'Pampers Baby',
-                            category: 'Kebutuhan Ibu & Anak',
-                            price: 45000,
-                            stock: 25
-                        },
-                        {
-                            id: 13,
-                            name: 'Whiskas',
-                            category: 'Makanan Hewan',
-                            price: 25000,
-                            stock: 30
-                        },
-                        {
-                            id: 14,
-                            name: 'Lego Bricks',
-                            category: 'Mainan',
-                            price: 150000,
-                            stock: 10
-                        },
-                        {
-                            id: 15,
-                            name: 'Lipstik Matte',
-                            category: 'Kecantikan',
-                            price: 35000,
-                            stock: 40
-                        },
-                        {
-                            id: 16,
-                            name: 'Shampo Sunsilk',
-                            category: 'Perawatan Diri',
-                            price: 12000,
-                            stock: 55
-                        }
-                    ];
+                hideToast() {
+                    const toast = document.getElementById('toastNotification');
+                    if (toast) toast.classList.remove('show');
+                },
 
-                    this.products = this.products.map(p => ({
-                        ...p,
-                        ...categoryColors[p.category]
-                    }));
-                    this.filteredProducts = [...this.products];
-                    this.transactions = JSON.parse(localStorage.getItem('transactions') || '[]');
+                showLoading(message = 'Memproses...') {
+                    this.loadingMessage = message;
+                    this.showLoadingModal = true;
+                    document.body.style.overflow = 'hidden';
+                },
 
-                    let savedCart = localStorage.getItem('posCart');
-                    if (savedCart) {
-                        try {
-                            this.cart = JSON.parse(savedCart);
-                            this.cart = this.cart.filter(item => item.price > 0);
-                        } catch (e) {
-                            this.cart = [];
+                hideLoading() {
+                    this.showLoadingModal = false;
+                    document.body.style.overflow = 'auto';
+                },
+
+                async loadDashboardStats() {
+                    try {
+                        const response = await fetch('/kasir/dashboard-stats');
+                        const data = await response.json();
+                        if (data.success) {
+                            this.transaksiHariIni = data.transaksi_hari_ini;
+                            this.pendapatanHariIni = data.pendapatan_hari_ini;
                         }
+                    } catch (error) {
+                        console.error('Error loading stats:', error);
                     }
                 },
 
-                saveCart() {
-                    localStorage.setItem('posCart', JSON.stringify(this.cart));
+                async loadCategories() {
+                    try {
+                        const response = await fetch('/kasir/categories');
+                        const data = await response.json();
+                        if (data.success) {
+                            this.categories = data.data;
+                        }
+                    } catch (error) {
+                        console.error('Error loading categories:', error);
+                        this.showToast('Gagal memuat kategori', 'error');
+                    }
+                },
+
+                async loadProducts() {
+                    try {
+                        const response = await fetch('/kasir/products');
+                        const data = await response.json();
+                        if (data.success) {
+                            this.products = data.data;
+                            this.filteredProducts = [...this.products];
+                        }
+                    } catch (error) {
+                        console.error('Error loading products:', error);
+                        this.showToast('Gagal memuat produk', 'error');
+                    }
+                },
+
+                async init() {
+                    this.showLoading('Memuat data...');
+                    await this.loadDashboardStats();
+                    await this.loadCategories();
+                    await this.loadProducts();
+                    this.hideLoading();
                 },
 
                 addToCart(product) {
-                    if (!product || product.stock <= 0) {
-                        alert('Stok habis!');
-                        return;
-                    }
-                    if (!product.price || product.price <= 0) {
-                        alert('Harga produk tidak valid!');
+                    if (product.stock <= 0) {
+                        this.showToast('Stok habis!', 'warning');
                         return;
                     }
 
                     let existing = this.cart.find(item => item.id === product.id);
                     if (existing) {
                         if (existing.qty >= product.stock) {
-                            alert('Stok tidak cukup!');
+                            this.showToast('Stok tidak cukup!', 'warning');
                             return;
                         }
                         existing.qty++;
@@ -628,7 +490,7 @@
                             maxStock: product.stock
                         });
                     }
-                    this.saveCart();
+                    this.showToast(`${product.name} ditambahkan ke keranjang`, 'success');
                 },
 
                 updateQty(index, newQty) {
@@ -637,116 +499,119 @@
                         return;
                     }
                     let item = this.cart[index];
-                    if (!item) return;
                     if (newQty > item.maxStock) {
-                        alert('Stok hanya ' + item.maxStock);
+                        this.showToast(`Stok hanya ${item.maxStock}`, 'warning');
                         return;
                     }
                     item.qty = newQty;
-                    this.saveCart();
                 },
 
                 removeItem(index) {
+                    const item = this.cart[index];
                     this.cart.splice(index, 1);
-                    this.saveCart();
+                    this.showToast(`${item.name} dihapus dari keranjang`, 'info');
                 },
 
-                processPayment() {
+                async processPayment() {
                     if (this.cart.length === 0) {
-                        alert('Keranjang kosong!');
+                        this.showToast('Keranjang kosong!', 'warning');
                         return;
                     }
                     if (!this.paymentAmount || this.paymentAmount <= 0) {
-                        alert('Masukkan jumlah bayar!');
+                        this.showToast('Masukkan jumlah bayar!', 'warning');
                         return;
                     }
                     if (this.changeAmount < 0) {
-                        alert('Uang kurang Rp ' + this.formatPrice(Math.abs(this.changeAmount)));
+                        this.showToast(`Uang kurang Rp ${this.formatPrice(Math.abs(this.changeAmount))}`, 'error');
                         return;
                     }
 
-                    let now = new Date();
-                    let transactionNumber = 'TRX-' + now.getFullYear() + (now.getMonth() + 1).toString().padStart(2, '0') +
-                        now.getDate().toString().padStart(2, '0') + '-' + Math.floor(Math.random() * 10000).toString()
-                        .padStart(4, '0');
+                    this.showLoading('Memproses pembayaran...');
 
-                    let newTransaction = {
-                        id: Date.now(),
-                        transaction_number: transactionNumber,
-                        date: now.toLocaleString('id-ID', {
-                            day: 'numeric',
-                            month: 'long',
-                            year: 'numeric',
-                            hour: '2-digit',
-                            minute: '2-digit'
-                        }),
-                        cashier: 'Kasir',
-                        items: [...this.cart],
-                        total_amount: this.cartTotal,
-                        payment_amount: this.paymentAmount,
-                        change_amount: this.changeAmount
+                    const transactionData = {
+                        items: this.cart.map(item => ({
+                            id: item.id,
+                            qty: item.qty
+                        })),
+                        payment_amount: this.paymentAmount
                     };
 
-                    this.cart.forEach(cartItem => {
-                        let product = this.products.find(p => p.id === cartItem.id);
-                        if (product) product.stock -= cartItem.qty;
-                    });
+                    try {
+                        const response = await fetch('/kasir/transaction', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                            },
+                            body: JSON.stringify(transactionData)
+                        });
 
-                    this.transactions.unshift(newTransaction);
-                    localStorage.setItem('transactions', JSON.stringify(this.transactions));
+                        const data = await response.json();
 
-                    this.lastTransaction = newTransaction;
-                    this.cart = [];
-                    this.paymentAmount = 0;
-                    this.paymentAmountFormatted = '';
-                    this.saveCart();
-                    this.filterProducts();
-                    this.showSuccessModal = true;
+                        if (data.success) {
+                            this.lastTransaction = data.data;
+                            this.cart = [];
+                            this.paymentAmount = 0;
+                            this.paymentAmountFormatted = '';
+                            await this.loadProducts();
+                            await this.loadDashboardStats();
+                            this.hideLoading();
+                            this.showSuccessModal = true;
+                            this.showToast(data.message, 'success');
+                        } else {
+                            this.hideLoading();
+                            this.showToast(data.message || 'Gagal memproses transaksi', 'error');
+                        }
+                    } catch (error) {
+                        console.error('Error:', error);
+                        this.hideLoading();
+                        this.showToast('Terjadi kesalahan pada server', 'error');
+                    }
                 },
 
                 printTransaction() {
                     let transaction = this.lastTransaction;
                     if (!transaction) return;
-                    let self = this;
+
                     let printWindow = window.open('', '_blank');
                     printWindow.document.write(`
-                    <!DOCTYPE html>
-                    <html>
-                    <head><title>Struk Transaksi</title>
-                    <style>
-                        body { font-family: monospace; padding: 20px; max-width: 300px; margin: 0 auto; }
-                        .header { text-align: center; border-bottom: 1px dashed #000; }
-                        .store-name { font-size: 18px; font-weight: bold; }
-                        hr { border: none; border-top: 1px dashed #000; margin: 10px 0; }
-                        table { width: 100%; }
-                        .text-right { text-align: right; }
-                        .footer { text-align: center; margin-top: 20px; font-size: 10px; }
-                    </style>
-                    </head>
-                    <body>
-                        <div class="header">
-                            <div class="store-name">PROShop</div>
-                            <div>${transaction.transaction_number}</div>
-                            <div>${transaction.date}</div>
-                            <div>Kasir: ${transaction.cashier}</div>
+                        <!DOCTYPE html>
+                        <html>
+                        <head><title>Struk Transaksi</title>
+                        <style>
+                            body { font-family: monospace; padding: 20px; max-width: 300px; margin: 0 auto; }
+                            .header { text-align: center; border-bottom: 1px dashed #000; }
+                            .store-name { font-size: 18px; font-weight: bold; }
+                            hr { border: none; border-top: 1px dashed #000; margin: 10px 0; }
+                            table { width: 100%; }
+                            .text-right { text-align: right; }
+                            .footer { text-align: center; margin-top: 20px; font-size: 10px; }
+                        </style>
+                        </head>
+                        <body>
+                            <div class="header">
+                                <div class="store-name">PROShop</div>
+                                <div>${transaction.transaction_number}</div>
+                                <div>${transaction.date}</div>
+                                <div>Kasir: {{ Auth::user()->name ?? 'Kasir' }}</div>
+                                <hr>
+                            </div>
+                            <table width="100%">
+                                <thead><tr><th>Item</th><th class="text-right">Qty</th><th class="text-right">Total</th></tr></thead>
+                                <tbody>
+                                    ${this.cart.map(item => `<tr><td>${item.name}</td><td class="text-right">${item.qty}</td><td class="text-right">Rp ${this.formatPrice(item.price * item.qty)}</td></tr>`).join('')}
+                                </tbody>
+                                <tfoot>
+                                    <tr><td colspan="2"><strong>Total</strong></td><td class="text-right"><strong>Rp ${this.formatPrice(transaction.total_amount)}</strong></td></tr>
+                                    <tr><td colspan="2">Bayar</td><td class="text-right">Rp ${this.formatPrice(transaction.payment_amount)}</td></tr>
+                                    <tr><td colspan="2">Kembalian</td><td class="text-right">Rp ${this.formatPrice(transaction.change_amount)}</td></tr>
+                                </tfoot>
+                            </table>
                             <hr>
-                        </div>
-                        <table width="100%">
-                            <thead><tr><th>Item</th><th class="text-right">Qty</th><th class="text-right">Total</th></tr></thead>
-                            <tbody>
-                                ${transaction.items.map(item => `<tr><td>${item.name}</td><td class="text-right">${item.qty}</td><td class="text-right">Rp ${self.formatPrice(item.price * item.qty)}</td></tr>`).join('')}
-                            </tbody>
-                            <tfoot>
-                                <tr><td colspan="2"><strong>Total</strong></td><td class="text-right"><strong>Rp ${self.formatPrice(transaction.total_amount)}</strong></td></tr>
-                                <tr><td colspan="2">Bayar</td><td class="text-right">Rp ${self.formatPrice(transaction.payment_amount)}</td></tr>
-                                <tr><td colspan="2">Kembalian</td><td class="text-right">Rp ${self.formatPrice(transaction.change_amount)}</td></tr>
-                            </tfoot>
-                        </table>
-                        <hr>
-                        <div class="footer">Terima Kasih!<br>~ Selamat Belanja Kembali ~</div>
-                    </body>
-                    </html>
-                `);
+                            <div class="footer">Terima Kasih!<br>~ Selamat Belanja Kembali ~</div>
+                        </body>
+                        </html>
+                    `);
                     printWindow.document.close();
                     printWindow.print();
                 },
@@ -755,17 +620,24 @@
                     this.showSuccessModal = false;
                     this.lastTransaction = null;
                 },
+
                 cancelTransaction() {
                     if (this.cart.length > 0) this.showCancelModal = true;
                 },
+
                 confirmCancel() {
                     this.cart = [];
                     this.paymentAmount = 0;
                     this.paymentAmountFormatted = '';
-                    this.saveCart();
                     this.showCancelModal = false;
+                    this.showToast('Transaksi dibatalkan', 'info');
                 }
             };
+        }
+
+        function hideToast() {
+            const toast = document.getElementById('toastNotification');
+            if (toast) toast.classList.remove('show');
         }
     </script>
 @endsection

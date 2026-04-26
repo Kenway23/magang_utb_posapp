@@ -226,22 +226,29 @@
                         <i id="stokIcon" class="fas fa-chevron-right text-xs rotate-icon"></i>
                     </button>
                     <div id="stokSubmenu" class="submenu-collapse ml-6 mt-1 space-y-1">
-                        {{-- 🔥 PERBAIKAN: Tambahkan .index --}}
-                        <a href="{{ route('gudang.stok.tambah_stok.index') }}"
-                            class="submenu-item flex items-center gap-2 px-4 py-2 rounded-lg text-sm transition-all duration-200 {{ request()->routeIs('gudang.stok.tambah_stok.index') ? 'submenu-active' : 'text-slate-600' }}">
-                            <i class="fas fa-arrow-down w-4 h-4"></i> Tambah Stok
+
+                        {{-- 🔥 REQUEST TAMBAH STOK (tanpa stok) --}}
+                        <a href="{{ route('gudang.tambah_stok.index') }}"
+                            class="submenu-item flex items-center gap-2 px-4 py-2 rounded-lg text-sm transition-all duration-200 {{ request()->routeIs('gudang.tambah_stok.*') ? 'submenu-active' : 'text-slate-600' }}">
+                            <i class="fas fa-arrow-down w-4 h-4"></i> Request Tambah Stok
                         </a>
-                        <a href="{{ route('gudang.stok.pengiriman') }}"
-                            class="submenu-item flex items-center gap-2 px-4 py-2 rounded-lg text-sm transition-all duration-200 {{ request()->routeIs('gudang.stok.pengiriman') ? 'submenu-active' : 'text-slate-600' }}">
-                            <i class="fas fa-arrow-up w-4 h-4"></i> Kirim Stok
+
+                        {{-- 🔥 REQUEST PENGIRIMAN (tanpa stok) --}}
+                        <a href="{{ route('gudang.pengiriman.index') }}"
+                            class="submenu-item flex items-center gap-2 px-4 py-2 rounded-lg text-sm transition-all duration-200 {{ request()->routeIs('gudang.pengiriman.*') ? 'submenu-active' : 'text-slate-600' }}">
+                            <i class="fas fa-arrow-up w-4 h-4"></i> Request Kirim Stok
                         </a>
+
+                        {{-- PENYESUAIAN STOK --}}
                         <a href="{{ route('gudang.stok.penyesuaian') }}"
                             class="submenu-item flex items-center gap-2 px-4 py-2 rounded-lg text-sm transition-all duration-200 {{ request()->routeIs('gudang.stok.penyesuaian') ? 'submenu-active' : 'text-slate-600' }}">
                             <i class="fas fa-sliders-h w-4 h-4"></i> Penyesuaian Stok
                         </a>
+
+                        {{-- LAPORAN STOK --}}
                         <a href="{{ route('gudang.stok.laporan') }}"
                             class="submenu-item flex items-center gap-2 px-4 py-2 rounded-lg text-sm transition-all duration-200 {{ request()->routeIs('gudang.stok.laporan') ? 'submenu-active' : 'text-slate-600' }}">
-                            <i class="fas fa-file-alt w-4 h-4"></i> Laporan
+                            <i class="fas fa-file-alt w-4 h-4"></i> Laporan Stok
                         </a>
                     </div>
                 </div>

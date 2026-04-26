@@ -42,7 +42,6 @@
             border-radius: 10px;
         }
 
-        /* Sidebar item hover effect */
         .sidebar-item {
             transition: all 0.2s ease;
         }
@@ -52,28 +51,24 @@
             transform: translateX(4px);
         }
 
-        /* Active menu style */
         .sidebar-item-active {
             background: #eef2ff;
             color: #4f46e5;
             font-weight: 500;
         }
 
-        /* Card hover effect */
         .card-hover:hover {
             transform: translateY(-4px);
             transition: all 0.3s ease;
             box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
         }
 
-        /* Product card hover */
         .product-card:hover {
             transform: translateY(-2px);
             transition: all 0.3s ease;
             box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
         }
 
-        /* Modal animation */
         @keyframes modalAnim {
             from {
                 opacity: 0;
@@ -90,7 +85,6 @@
             animation: modalAnim 0.2s ease-out;
         }
 
-        /* Spinner animation */
         @keyframes spin {
             to {
                 transform: rotate(360deg);
@@ -99,16 +93,6 @@
 
         .animate-spin {
             animation: spin 1s linear infinite;
-        }
-
-        /* Category button active */
-        .category-btn.active {
-            background-color: #4f46e5;
-            color: white;
-        }
-
-        .category-btn {
-            transition: all 0.2s ease;
         }
 
         [x-cloak] {
@@ -138,31 +122,29 @@
             </div>
 
             <nav class="flex-1 p-4 space-y-1">
-                <!-- Beranda / POS -->
+                {{-- Dashboard & POS (Gabungan) --}}
                 <a href="{{ route('kasir.dashboard') }}"
-                    class="sidebar-item flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 {{ request()->routeIs('kasir.dashboard') ? 'sidebar-item-active' : 'text-slate-600' }}">
-                    <i class="fas fa-home w-5 h-5"></i>
-                    <span>Beranda</span>
+                    class="sidebar-item flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 {{ request()->routeIs('kasir.dashboard') ? 'sidebar-item-active' : 'text-slate-600 hover:bg-slate-50' }}">
+                    <i class="fas fa-chart-line w-5 h-5"></i>
+                    <span>Dashboard & POS</span>
                 </a>
 
-
-
-                <!-- Riwayat Transaksi -->
+                {{-- Riwayat Transaksi --}}
                 <a href="{{ route('kasir.riwayat_transaksi') }}"
-                    class="sidebar-item flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 {{ request()->routeIs('kasir.riwayat_transaksi') ? 'sidebar-item-active' : 'text-slate-600' }}">
+                    class="sidebar-item flex items-center gap-3 px-4 py-3 rounded-xl text-slate-600 hover:bg-slate-50 transition">
                     <i class="fas fa-history w-5 h-5"></i>
                     <span>Riwayat Transaksi</span>
                 </a>
 
-                <!-- Laporan Penjualan -->
+                {{-- Laporan --}}
                 <a href="{{ route('kasir.laporan') }}"
-                    class="sidebar-item flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 {{ request()->routeIs('kasir.laporan') ? 'sidebar-item-active' : 'text-slate-600' }}">
-                    <i class="fas fa-chart-line w-5 h-5"></i>
-                    <span>Laporan Penjualan</span>
+                    class="sidebar-item flex items-center gap-3 px-4 py-3 rounded-xl text-slate-600 hover:bg-slate-50 transition">
+                    <i class="fas fa-chart-bar w-5 h-5"></i>
+                    <span>Laporan</span>
                 </a>
             </nav>
 
-            {{-- TOMBOL LOGOUT dengan modal confirmation --}}
+            {{-- TOMBOL LOGOUT --}}
             <div class="p-4 border-t border-slate-200">
                 <button onclick="showLogoutConfirm()"
                     class="flex items-center gap-3 px-4 py-3 rounded-xl text-red-600 hover:bg-red-50 transition-all duration-200 w-full">
@@ -178,7 +160,7 @@
                 <div class="flex justify-between items-center">
                     <div>
                         <h2 class="text-2xl font-semibold text-slate-800">@yield('header-title', 'Dashboard Kasir')</h2>
-                        <p class="text-sm text-slate-500 mt-0.5">@yield('header-subtitle', 'Selamat datang, Kasir!')</p>
+                        <p class="text-sm text-slate-500 mt-0.5">@yield('header-subtitle', 'Selamat datang, ' . Auth::user()->name . '!')</p>
                     </div>
                     <div class="flex items-center gap-4">
                         <div class="flex items-center gap-2 pl-3 border-l border-slate-200">
@@ -199,134 +181,10 @@
         </main>
     </div>
 
-    {{-- ==================== JAVASCRIPT ==================== --}}
-    <script>
-        // Modal Functions
-        function showModal(modalId) {
-            const modal = document.getElementById(modalId);
-            if (modal) {
-                modal.classList.remove('hidden');
-                document.body.style.overflow = 'hidden';
-            }
-        }
-
-        function closeModal(modalId) {
-            const modal = document.getElementById(modalId);
-            if (modal) {
-                modal.classList.add('hidden');
-                document.body.style.overflow = 'auto';
-            }
-        }
-
-        function showSuccess(message, title = 'Berhasil!') {
-            const modal = document.getElementById('modalSuccess');
-            if (modal) {
-                document.getElementById('successTitle').innerText = title;
-                document.getElementById('successMessage').innerHTML = message;
-                modal.classList.remove('hidden');
-                document.body.style.overflow = 'hidden';
-                setTimeout(() => closeModal('modalSuccess'), 2500);
-            } else {
-                alert(message);
-            }
-        }
-
-        function showError(message, title = 'Gagal!') {
-            const modal = document.getElementById('modalError');
-            if (modal) {
-                document.getElementById('errorTitle').innerText = title;
-                document.getElementById('errorMessage').innerHTML = message;
-                modal.classList.remove('hidden');
-                document.body.style.overflow = 'hidden';
-            } else {
-                alert(message);
-            }
-        }
-
-        function showWarning(message, title = 'Peringatan!') {
-            const modal = document.getElementById('modalWarning');
-            if (modal) {
-                document.getElementById('warningTitle').innerText = title;
-                document.getElementById('warningMessage').innerHTML = message;
-                modal.classList.remove('hidden');
-                document.body.style.overflow = 'hidden';
-            } else {
-                alert(message);
-            }
-        }
-
-        function showInfo(message, title = 'Informasi') {
-            const modal = document.getElementById('modalInfo');
-            if (modal) {
-                document.getElementById('infoTitle').innerText = title;
-                document.getElementById('infoMessage').innerHTML = message;
-                modal.classList.remove('hidden');
-                document.body.style.overflow = 'hidden';
-                setTimeout(() => closeModal('modalInfo'), 2000);
-            } else {
-                alert(message);
-            }
-        }
-
-        function showConfirmDelete(message, onConfirm) {
-            const modal = document.getElementById('modalConfirmDelete');
-            if (modal) {
-                document.getElementById('confirmDeleteMessage').innerHTML = message;
-                const confirmBtn = document.getElementById('confirmDeleteBtn');
-                const newBtn = confirmBtn.cloneNode(true);
-                confirmBtn.parentNode.replaceChild(newBtn, confirmBtn);
-                newBtn.onclick = () => {
-                    closeModal('modalConfirmDelete');
-                    if (onConfirm) onConfirm();
-                };
-                modal.classList.remove('hidden');
-                document.body.style.overflow = 'hidden';
-            } else if (confirm(message)) {
-                if (onConfirm) onConfirm();
-            }
-        }
-
-        // LOGOUT CONFIRMATION
-        function showLogoutConfirm() {
-            const modal = document.getElementById('modalLogoutConfirm');
-            if (modal) {
-                modal.classList.remove('hidden');
-                document.body.style.overflow = 'hidden';
-            }
-        }
-
-        function confirmLogout() {
-            closeModal('modalLogoutConfirm');
-            showLoading('Logging out...');
-            setTimeout(() => {
-                document.getElementById('logoutForm').submit();
-            }, 1000);
-        }
-
-        function showLoading(message) {
-            const modal = document.getElementById('modalLoading');
-            if (modal) {
-                document.getElementById('loadingMessage').innerHTML = message || 'Memproses...';
-                modal.classList.remove('hidden');
-                document.body.style.overflow = 'hidden';
-            }
-        }
-
-        function hideLoading() {
-            const modal = document.getElementById('modalLoading');
-            if (modal) {
-                modal.classList.add('hidden');
-                document.body.style.overflow = 'auto';
-            }
-        }
-    </script>
-
-    {{-- Form logout tersembunyi --}}
+    {{-- Form logout --}}
     <form id="logoutForm" method="POST" action="{{ route('logout') }}" style="display: none;">
         @csrf
     </form>
-
-    @stack('scripts')
 
     {{-- ==================== MODAL COMPONENTS ==================== --}}
 
@@ -427,7 +285,6 @@
                         <p class="text-sm text-slate-500">Apakah Anda yakin ingin keluar?</p>
                     </div>
                 </div>
-
                 <div class="bg-amber-50 border border-amber-200 rounded-xl p-4 mb-6">
                     <div class="flex items-start gap-3">
                         <i class="fas fa-exclamation-triangle text-amber-500 mt-0.5"></i>
@@ -438,7 +295,6 @@
                         </div>
                     </div>
                 </div>
-
                 <div class="flex justify-end gap-3">
                     <button onclick="closeModal('modalLogoutConfirm')"
                         class="px-5 py-2.5 border border-slate-300 rounded-lg text-slate-700 hover:bg-slate-50 transition font-medium">
@@ -453,6 +309,135 @@
         </div>
     </div>
 
+    <script>
+        // Modal Functions
+        function showModal(modalId) {
+            const modal = document.getElementById(modalId);
+            if (modal) {
+                modal.classList.remove('hidden');
+                document.body.style.overflow = 'hidden';
+            }
+        }
+
+        function closeModal(modalId) {
+            const modal = document.getElementById(modalId);
+            if (modal) {
+                modal.classList.add('hidden');
+                document.body.style.overflow = 'auto';
+            }
+        }
+
+        function showSuccess(message, title = 'Berhasil!') {
+            const modal = document.getElementById('modalSuccess');
+            if (modal) {
+                document.getElementById('successTitle').innerText = title;
+                document.getElementById('successMessage').innerHTML = message;
+                modal.classList.remove('hidden');
+                document.body.style.overflow = 'hidden';
+                setTimeout(() => closeModal('modalSuccess'), 2500);
+            } else {
+                alert(message);
+            }
+        }
+
+        function showError(message, title = 'Gagal!') {
+            const modal = document.getElementById('modalError');
+            if (modal) {
+                document.getElementById('errorTitle').innerText = title;
+                document.getElementById('errorMessage').innerHTML = message;
+                modal.classList.remove('hidden');
+                document.body.style.overflow = 'hidden';
+            } else {
+                alert(message);
+            }
+        }
+
+        function showWarning(message, title = 'Peringatan!') {
+            const modal = document.getElementById('modalWarning');
+            if (modal) {
+                document.getElementById('warningTitle').innerText = title;
+                document.getElementById('warningMessage').innerHTML = message;
+                modal.classList.remove('hidden');
+                document.body.style.overflow = 'hidden';
+            } else {
+                alert(message);
+            }
+        }
+
+        function showInfo(message, title = 'Informasi') {
+            const modal = document.getElementById('modalInfo');
+            if (modal) {
+                document.getElementById('infoTitle').innerText = title;
+                document.getElementById('infoMessage').innerHTML = message;
+                modal.classList.remove('hidden');
+                document.body.style.overflow = 'hidden';
+                setTimeout(() => closeModal('modalInfo'), 2000);
+            } else {
+                alert(message);
+            }
+        }
+
+        function showConfirmDelete(message, onConfirm) {
+            const modal = document.getElementById('modalConfirmDelete');
+            if (modal) {
+                document.getElementById('confirmDeleteMessage').innerHTML = message;
+                const confirmBtn = document.getElementById('confirmDeleteBtn');
+                const newBtn = confirmBtn.cloneNode(true);
+                confirmBtn.parentNode.replaceChild(newBtn, confirmBtn);
+                newBtn.onclick = () => {
+                    closeModal('modalConfirmDelete');
+                    if (onConfirm) onConfirm();
+                };
+                modal.classList.remove('hidden');
+                document.body.style.overflow = 'hidden';
+            } else if (confirm(message)) {
+                if (onConfirm) onConfirm();
+            }
+        }
+
+        function showLogoutConfirm() {
+            const modal = document.getElementById('modalLogoutConfirm');
+            if (modal) {
+                modal.classList.remove('hidden');
+                document.body.style.overflow = 'hidden';
+            }
+        }
+
+        function confirmLogout() {
+            closeModal('modalLogoutConfirm');
+            showLoading('Logging out...');
+            setTimeout(() => {
+                document.getElementById('logoutForm').submit();
+            }, 1000);
+        }
+
+        function showLoading(message) {
+            const modal = document.getElementById('modalLoading');
+            if (modal) {
+                document.getElementById('loadingMessage').innerHTML = message || 'Memproses...';
+                modal.classList.remove('hidden');
+                document.body.style.overflow = 'hidden';
+            }
+        }
+
+        function hideLoading() {
+            const modal = document.getElementById('modalLoading');
+            if (modal) {
+                modal.classList.add('hidden');
+                document.body.style.overflow = 'auto';
+            }
+        }
+
+        // Close modal when clicking outside
+        window.addEventListener('click', function(event) {
+            if (event.target.classList && event.target.classList.contains('fixed')) {
+                event.target.classList.add('hidden');
+                document.body.style.overflow = 'auto';
+            }
+        });
+    </script>
+
+    @stack('scripts')
 </body>
 
 </html>

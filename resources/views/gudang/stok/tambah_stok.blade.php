@@ -367,7 +367,7 @@
 
             showLoading('Menyimpan request...');
 
-            const url = id ? `/gudang/tambah-stok/${id}` : '{{ route('gudang.stok.tambah_stok.store') }}';
+            const url = id ? `/gudang/tambah-stok/${id}` : '{{ route('gudang.tambah_stok.store') }}';
             const method = id ? 'PUT' : 'POST';
 
             fetch(url, {

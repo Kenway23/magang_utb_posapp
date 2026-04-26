@@ -219,7 +219,7 @@
                     </div>
                 </div>
                 <div class="px-4 py-3 border-t border-slate-100 bg-slate-50/30">
-                    <a href="{{ route('gudang.stok.pengiriman') }}"
+                    <a href="{{ route('gudang.pengiriman.index') }}"
                         class="text-indigo-600 text-xs hover:underline flex items-center justify-center gap-1">
                         Lihat Semua Pengiriman <i class="fas fa-arrow-right text-xs"></i>
                     </a>

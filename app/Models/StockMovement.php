@@ -7,24 +7,20 @@ use Illuminate\Database\Eloquent\Model;
 class StockMovement extends Model
 {
     protected $table = 'stock_movements';
-    protected $primaryKey = 'id';
-    public $timestamps = true;
-    public $incrementing = true;
 
     protected $fillable = [
         'produk_id',
-        'user_id',
         'type',
+        // 'location',  // 🔥 HAPUS - kolom tidak ada di database
         'jumlah',
+        'stok_gudang_sebelum',
+        'stok_gudang_sesudah',
+        'stok_toko_sebelum',
+        'stok_toko_sesudah',
+        'referensi_tabel',
+        'referensi_id',
         'keterangan',
-        'status',
-        'approved_by'
-    ];
-
-    protected $casts = [
-        'jumlah' => 'integer',
-        'created_at' => 'datetime',
-        'updated_at' => 'datetime'
+        'created_by'
     ];
 
     public function produk()
@@ -32,13 +28,8 @@ class StockMovement extends Model
         return $this->belongsTo(Produk::class, 'produk_id', 'produk_id');
     }
 
-    public function user()
+    public function creator()
     {
-        return $this->belongsTo(User::class, 'user_id', 'user_id');
-    }
-
-    public function approvedBy()
-    {
-        return $this->belongsTo(User::class, 'approved_by', 'user_id');
+        return $this->belongsTo(User::class, 'created_by', 'user_id');
     }
 }

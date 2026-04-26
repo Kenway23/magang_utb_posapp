@@ -2,9 +2,7 @@
 
 @section('title', 'Persetujuan Aktivitas Gudang - PROShop')
 @section('header-title', 'Persetujuan Aktivitas Gudang')
-@section('header-subtitle',
-    'Setujui atau tolak pengajuan (Produk Baru, Tambah Stok, Stok Masuk, Stok Keluar,
-    Penyesuaian)')
+@section('header-subtitle', 'Setujui atau tolak pengajuan (Produk Baru, Tambah Stok, Pengiriman Stok)')
 
 @section('content')
     <style>
@@ -142,35 +140,35 @@
             </div>
         </div>
 
-        <!-- TABS UTAMA (Jenis Pengajuan) -->
+        <!-- TABS UTAMA -->
         <div class="bg-white rounded-xl shadow-sm mb-4">
             <div class="border-b border-slate-200 px-6">
                 <div class="flex gap-6 overflow-x-auto">
-                    <button onclick="showJenisTab('produk')"
+                    <button onclick="showJenisTab('produk')" id="tabJenisProduk"
                         class="tab-jenis py-3 px-2 text-sm font-medium transition tab-active">
                         <i class="fas fa-box text-indigo-500 mr-2"></i> Produk Baru
                         <span id="badgeProduk"
                             class="ml-2 px-1.5 py-0.5 text-xs bg-amber-500 text-white rounded-full">0</span>
                     </button>
-                    <button onclick="showJenisTab('tambah_stok')"
+                    <button onclick="showJenisTab('tambah_stok')" id="tabJenisTambahStok"
                         class="tab-jenis py-3 px-2 text-sm font-medium transition text-slate-500 hover:text-slate-700">
                         <i class="fas fa-plus-circle text-teal-500 mr-2"></i> Tambah Stok
                         <span id="badgeTambahStok"
                             class="ml-2 px-1.5 py-0.5 text-xs bg-amber-500 text-white rounded-full">0</span>
                     </button>
-                    <button onclick="showJenisTab('penerimaan')"
-                        class="tab-jenis py-3 px-2 text-sm font-medium transition text-slate-500 hover:text-slate-700">
-                        <i class="fas fa-arrow-down text-emerald-500 mr-2"></i> Penerimaan Stok
-                        <span id="badgePenerimaan"
-                            class="ml-2 px-1.5 py-0.5 text-xs bg-amber-500 text-white rounded-full">0</span>
-                    </button>
-                    <button onclick="showJenisTab('pengiriman')"
+                    <button onclick="showJenisTab('pengiriman')" id="tabJenisPengiriman"
                         class="tab-jenis py-3 px-2 text-sm font-medium transition text-slate-500 hover:text-slate-700">
                         <i class="fas fa-arrow-up text-orange-500 mr-2"></i> Pengiriman Stok
                         <span id="badgePengiriman"
                             class="ml-2 px-1.5 py-0.5 text-xs bg-amber-500 text-white rounded-full">0</span>
                     </button>
-                    <button onclick="showJenisTab('penyesuaian')"
+                    <button onclick="showJenisTab('penerimaan')" id="tabJenisPenerimaan"
+                        class="tab-jenis py-3 px-2 text-sm font-medium transition text-slate-500 hover:text-slate-700">
+                        <i class="fas fa-arrow-down text-emerald-500 mr-2"></i> Penerimaan Stok
+                        <span id="badgePenerimaan"
+                            class="ml-2 px-1.5 py-0.5 text-xs bg-amber-500 text-white rounded-full">0</span>
+                    </button>
+                    <button onclick="showJenisTab('penyesuaian')" id="tabJenisPenyesuaian"
                         class="tab-jenis py-3 px-2 text-sm font-medium transition text-slate-500 hover:text-slate-700">
                         <i class="fas fa-sliders-h text-purple-500 mr-2"></i> Penyesuaian Stok
                         <span id="badgePenyesuaian"
@@ -258,34 +256,11 @@
                         </tr>
                     </thead>
                     <tbody id="tbodyTambahStok" class="divide-y divide-slate-100"></tbody>
-                    </tr>
-            </div>
-        </div>
-
-        <!-- TABEL LAINNYA (Placeholder) -->
-        <div id="tablePenerimaan"
-            class="bg-white rounded-xl shadow-sm overflow-hidden border border-slate-200 mb-6 hidden">
-            <div class="px-5 py-3.5 border-b border-slate-200 bg-slate-50/50">
-                <h3 class="font-semibold text-slate-800"><i class="fas fa-arrow-down text-emerald-500 mr-2"></i> Daftar
-                    Pengajuan Penerimaan Stok</h3>
-            </div>
-            <div class="table-container overflow-x-auto">
-                <table class="w-full text-sm">
-                    <thead class="bg-slate-50">
-                        <tr>
-                            <th class="px-5 py-3 text-left">Tgl Pengajuan</th>
-                            <th class="px-5 py-3 text-left">Produk</th>
-                            <th class="px-5 py-3 text-left">Jumlah</th>
-                            <th class="px-5 py-3 text-left">Supplier</th>
-                            <th class="px-5 py-3 text-left">Status</th>
-                            <th class="px-5 py-3 text-center">Aksi</th>
-                        </tr>
-                    </thead>
-                    <tbody id="tbodyPenerimaan"></tbody>
                 </table>
             </div>
         </div>
 
+        <!-- TABEL PENGIRIMAN STOK -->
         <div id="tablePengiriman"
             class="bg-white rounded-xl shadow-sm overflow-hidden border border-slate-200 mb-6 hidden">
             <div class="px-5 py-3.5 border-b border-slate-200 bg-slate-50/50">
@@ -296,19 +271,40 @@
                 <table class="w-full text-sm">
                     <thead class="bg-slate-50">
                         <tr>
-                            <th class="px-5 py-3 text-left">Tgl Pengajuan</th>
-                            <th class="px-5 py-3 text-left">Produk</th>
-                            <th class="px-5 py-3 text-left">Jumlah</th>
-                            <th class="px-5 py-3 text-left">Tujuan</th>
-                            <th class="px-5 py-3 text-left">Status</th>
-                            <th class="px-5 py-3 text-center">Aksi</th>
-                        </tr>
+                            <th class="px-5 py-3 text-left text-xs font-semibold text-slate-500 uppercase">Tgl Pengajuan
+                            </th>
+                            <th class="px-5 py-3 text-left text-xs font-semibold text-slate-500 uppercase">Kode</th>
+                            <th class="px-5 py-3 text-left text-xs font-semibold text-slate-500 uppercase">Produk</th>
+                            <th class="px-5 py-3 text-left text-xs font-semibold text-slate-500 uppercase">Jumlah</th>
+                            <th class="px-5 py-3 text-left text-xs font-semibold text-slate-500 uppercase">Stok Gudang</th>
+                            <th class="px-5 py-3 text-left text-xs font-semibold text-slate-500 uppercase">Tujuan</th>
+                            <th class="px-5 py-3 text-left text-xs font-semibold text-slate-500 uppercase">Diajukan Oleh
+                            </th>
+                            <th class="px-5 py-3 text-left text-xs font-semibold text-slate-500 uppercase">Status</th>
+                            <th class="px-5 py-3 text-center text-xs font-semibold text-slate-500 uppercase">Aksi</th>
+                        <tr>
                     </thead>
-                    <tbody id="tbodyPengiriman"></tbody>
+                    <tbody id="tbodyPengiriman" class="divide-y divide-slate-100"></tbody>
                 </table>
             </div>
         </div>
 
+        <!-- TABEL PENERIMAAN STOK (Placeholder) -->
+        <div id="tablePenerimaan"
+            class="bg-white rounded-xl shadow-sm overflow-hidden border border-slate-200 mb-6 hidden">
+            <div class="px-5 py-3.5 border-b border-slate-200 bg-slate-50/50">
+                <h3 class="font-semibold text-slate-800"><i class="fas fa-arrow-down text-emerald-500 mr-2"></i> Daftar
+                    Pengajuan Penerimaan Stok</h3>
+            </div>
+            <div class="table-container overflow-x-auto">
+                <table class="w-full text-sm">
+                    <thead class="bg-slate-50">...</thead>
+                    <tbody id="tbodyPenerimaan"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- TABEL PENYESUAIAN STOK (Placeholder) -->
         <div id="tablePenyesuaian"
             class="bg-white rounded-xl shadow-sm overflow-hidden border border-slate-200 mb-6 hidden">
             <div class="px-5 py-3.5 border-b border-slate-200 bg-slate-50/50">
@@ -317,17 +313,7 @@
             </div>
             <div class="table-container overflow-x-auto">
                 <table class="w-full text-sm">
-                    <thead class="bg-slate-50">
-                        <tr>
-                            <th class="px-5 py-3 text-left">Tgl Pengajuan</th>
-                            <th class="px-5 py-3 text-left">Produk</th>
-                            <th class="px-5 py-3 text-left">Stok Lama</th>
-                            <th class="px-5 py-3 text-left">Stok Baru</th>
-                            <th class="px-5 py-3 text-left">Alasan</th>
-                            <th class="px-5 py-3 text-left">Status</th>
-                            <th class="px-5 py-3 text-center">Aksi</th>
-                        </tr>
-                    </thead>
+                    <thead class="bg-slate-50">...</thead>
                     <tbody id="tbodyPenyesuaian"></tbody>
                 </table>
             </div>
@@ -389,22 +375,24 @@
     </div>
 
     <script>
-        // Data dari server (satu endpoint)
+        // Data dari server
         let produkData = [];
         let tambahStokData = [];
+        let pengirimanData = [];
         let currentJenisTab = 'produk';
         let currentStatusTab = 'semua';
         let currentItemId = null;
         let currentItemType = null;
         let currentItemName = null;
 
-        // Load semua data dari satu endpoint (owner.stok.approval.data)
+        // Load semua data
         function loadData() {
             fetch('/owner/stok/approval/data')
                 .then(res => res.json())
                 .then(data => {
                     if (data.success) {
-                        produkData = data.data.produk_baru.map(p => ({
+                        // Produk Baru
+                        produkData = (data.data.produk_baru || []).map(p => ({
                             id: p.id,
                             nama: p.nama,
                             kategori: p.kategori,
@@ -416,7 +404,8 @@
                             alasan_ditolak: p.alasan_ditolak
                         }));
 
-                        tambahStokData = data.data.tambah_stok.map(item => ({
+                        // Tambah Stok
+                        tambahStokData = (data.data.tambah_stok || []).map(item => ({
                             id: item.id,
                             produk_nama: item.nama,
                             jumlah_request: item.jumlah_request,
@@ -429,17 +418,33 @@
                             alasan_ditolak: item.alasan_ditolak
                         }));
 
+                        // Pengiriman Stok
+                        pengirimanData = (data.data.pengiriman || []).map(item => ({
+                            id: item.id,
+                            kode: item.kode,
+                            produk_nama: item.nama,
+                            jumlah: item.jumlah,
+                            stok_gudang_sesudah: item.stok_gudang_sesudah,
+                            tujuan_toko: item.tujuan_toko,
+                            requester_name: item.diajukan_oleh,
+                            created_at: item.tanggal,
+                            status: item.status,
+                            alasan_ditolak: item.alasan_ditolak
+                        }));
+
                         updateStatistics();
 
+                        // Render tab yang aktif
                         if (currentJenisTab === 'produk') renderTabelProduk();
                         else if (currentJenisTab === 'tambah_stok') renderTabelTambahStok();
+                        else if (currentJenisTab === 'pengiriman') renderTabelPengiriman();
                     }
                 })
                 .catch(err => console.error('Error load data:', err));
         }
 
         function updateStatistics() {
-            const semuaProduk = [...produkData, ...tambahStokData];
+            const semuaProduk = [...produkData, ...tambahStokData, ...pengirimanData];
             const menunggu = semuaProduk.filter(p => p.status === 'pending').length;
             const disetujui = semuaProduk.filter(p => p.status === 'approved').length;
             const ditolak = semuaProduk.filter(p => p.status === 'rejected').length;
@@ -451,36 +456,42 @@
 
             document.getElementById('badgeProduk').innerText = produkData.filter(p => p.status === 'pending').length;
             document.getElementById('badgeTambahStok').innerText = tambahStokData.filter(p => p.status === 'pending')
-                .length;
+            .length;
+            document.getElementById('badgePengiriman').innerText = pengirimanData.filter(p => p.status === 'pending')
+            .length;
         }
 
+        // 🔥 PERBAIKAN: Fungsi showJenisTab yang benar
         function showJenisTab(jenis) {
             currentJenisTab = jenis;
 
-            // Update tab style - gunakan class, bukan ID
-            document.querySelectorAll('.tab-jenis').forEach(tab => {
+            // Update tab style
+            const tabs = document.querySelectorAll('.tab-jenis');
+            tabs.forEach(tab => {
                 tab.classList.remove('tab-active');
                 tab.classList.add('text-slate-500');
             });
 
-            // Cari tab yang aktif berdasarkan event target
-            const activeTabs = document.querySelectorAll('.tab-jenis');
-            for (let i = 0; i < activeTabs.length; i++) {
-                const tab = activeTabs[i];
-                const tabText = tab.innerText.toLowerCase();
-                if (tabText.includes(jenis.replace('_', ' '))) {
-                    tab.classList.add('tab-active');
-                    tab.classList.remove('text-slate-500');
-                    break;
-                }
+            // Aktifkan tab yang dipilih
+            let activeTabId = '';
+            if (jenis === 'produk') activeTabId = 'tabJenisProduk';
+            else if (jenis === 'tambah_stok') activeTabId = 'tabJenisTambahStok';
+            else if (jenis === 'pengiriman') activeTabId = 'tabJenisPengiriman';
+            else if (jenis === 'penerimaan') activeTabId = 'tabJenisPenerimaan';
+            else if (jenis === 'penyesuaian') activeTabId = 'tabJenisPenyesuaian';
+
+            const activeTab = document.getElementById(activeTabId);
+            if (activeTab) {
+                activeTab.classList.add('tab-active');
+                activeTab.classList.remove('text-slate-500');
             }
 
             // Hide all tables
-            document.getElementById('tableProduk')?.classList.add('hidden');
-            document.getElementById('tableTambahStok')?.classList.add('hidden');
-            document.getElementById('tablePenerimaan')?.classList.add('hidden');
-            document.getElementById('tablePengiriman')?.classList.add('hidden');
-            document.getElementById('tablePenyesuaian')?.classList.add('hidden');
+            const tables = ['tableProduk', 'tableTambahStok', 'tablePengiriman', 'tablePenerimaan', 'tablePenyesuaian'];
+            tables.forEach(tableId => {
+                const table = document.getElementById(tableId);
+                if (table) table.classList.add('hidden');
+            });
 
             // Show selected table
             if (jenis === 'produk') {
@@ -491,14 +502,14 @@
                 const table = document.getElementById('tableTambahStok');
                 if (table) table.classList.remove('hidden');
                 renderTabelTambahStok();
-            } else if (jenis === 'penerimaan') {
-                const table = document.getElementById('tablePenerimaan');
-                if (table) table.classList.remove('hidden');
-                renderTabelPenerimaan();
             } else if (jenis === 'pengiriman') {
                 const table = document.getElementById('tablePengiriman');
                 if (table) table.classList.remove('hidden');
                 renderTabelPengiriman();
+            } else if (jenis === 'penerimaan') {
+                const table = document.getElementById('tablePenerimaan');
+                if (table) table.classList.remove('hidden');
+                renderTabelPenerimaan();
             } else if (jenis === 'penyesuaian') {
                 const table = document.getElementById('tablePenyesuaian');
                 if (table) table.classList.remove('hidden');
@@ -512,12 +523,22 @@
                 tab.classList.remove('border-b-2', 'border-emerald-500', 'text-emerald-600');
                 tab.classList.add('text-slate-500');
             });
-            let tabId = status === 'semua' ? 'tabStatusSemua' : status === 'pending' ? 'tabStatusPending' : status ===
-                'approved' ? 'tabStatusApproved' : 'tabStatusRejected';
-            document.getElementById(tabId).classList.add('border-b-2', 'border-emerald-500', 'text-emerald-600');
+
+            let tabId = '';
+            if (status === 'semua') tabId = 'tabStatusSemua';
+            else if (status === 'pending') tabId = 'tabStatusPending';
+            else if (status === 'approved') tabId = 'tabStatusApproved';
+            else if (status === 'rejected') tabId = 'tabStatusRejected';
+
+            const activeTab = document.getElementById(tabId);
+            if (activeTab) {
+                activeTab.classList.add('border-b-2', 'border-emerald-500', 'text-emerald-600');
+                activeTab.classList.remove('text-slate-500');
+            }
 
             if (currentJenisTab === 'produk') renderTabelProduk();
             else if (currentJenisTab === 'tambah_stok') renderTabelTambahStok();
+            else if (currentJenisTab === 'pengiriman') renderTabelPengiriman();
         }
 
         function getFilteredData(data) {
@@ -527,30 +548,59 @@
 
         function getStatusBadge(status) {
             if (status === 'pending')
-                return '<span class="status-badge status-pending"><i class="fas fa-clock text-xs"></i> Menunggu</span>';
+            return '<span class="status-badge status-pending"><i class="fas fa-clock text-xs"></i> Menunggu</span>';
             if (status === 'approved')
-                return '<span class="status-badge status-approved"><i class="fas fa-check-circle text-xs"></i> Disetujui</span>';
+            return '<span class="status-badge status-approved"><i class="fas fa-check-circle text-xs"></i> Disetujui</span>';
             if (status === 'rejected')
-                return '<span class="status-badge status-rejected"><i class="fas fa-times-circle text-xs"></i> Ditolak</span>';
+            return '<span class="status-badge status-rejected"><i class="fas fa-times-circle text-xs"></i> Ditolak</span>';
             return '';
         }
 
-        function getActionButtons(item, type, id, nama) {
+        function getActionButtonsProduk(item) {
             if (item.status !== 'pending') return '<span class="text-slate-400 text-xs">-</span>';
             return `
-                <div class="flex items-center justify-center gap-2">
-                    <button onclick="showApproveModal('${type}', ${id}, '${nama.replace(/'/g, "\\'")}')" class="action-btn bg-emerald-500 hover:bg-emerald-600 text-white px-3 py-1.5 rounded-lg text-xs font-medium flex items-center gap-1">
-                        <i class="fas fa-check text-xs"></i> Setuju
-                    </button>
-                    <button onclick="showRejectModal('${type}', ${id}, '${nama.replace(/'/g, "\\'")}')" class="action-btn bg-rose-500 hover:bg-rose-600 text-white px-3 py-1.5 rounded-lg text-xs font-medium flex items-center gap-1">
-                        <i class="fas fa-times text-xs"></i> Tolak
-                    </button>
-                </div>
-            `;
+            <div class="flex items-center justify-center gap-2">
+                <button onclick="showApproveModal('produk', ${item.id}, '${item.nama.replace(/'/g, "\\'")}')" class="action-btn bg-emerald-500 hover:bg-emerald-600 text-white px-3 py-1.5 rounded-lg text-xs font-medium flex items-center gap-1">
+                    <i class="fas fa-check text-xs"></i> Setuju
+                </button>
+                <button onclick="showRejectModal('produk', ${item.id}, '${item.nama.replace(/'/g, "\\'")}')" class="action-btn bg-rose-500 hover:bg-rose-600 text-white px-3 py-1.5 rounded-lg text-xs font-medium flex items-center gap-1">
+                    <i class="fas fa-times text-xs"></i> Tolak
+                </button>
+            </div>
+        `;
+        }
+
+        function getActionButtonsTambahStok(item) {
+            if (item.status !== 'pending') return '<span class="text-slate-400 text-xs">-</span>';
+            return `
+            <div class="flex items-center justify-center gap-2">
+                <button onclick="showApproveModal('tambah_stok', ${item.id}, '${item.produk_nama.replace(/'/g, "\\'")}')" class="action-btn bg-emerald-500 hover:bg-emerald-600 text-white px-3 py-1.5 rounded-lg text-xs font-medium flex items-center gap-1">
+                    <i class="fas fa-check text-xs"></i> Setuju
+                </button>
+                <button onclick="showRejectModal('tambah_stok', ${item.id}, '${item.produk_nama.replace(/'/g, "\\'")}')" class="action-btn bg-rose-500 hover:bg-rose-600 text-white px-3 py-1.5 rounded-lg text-xs font-medium flex items-center gap-1">
+                    <i class="fas fa-times text-xs"></i> Tolak
+                </button>
+            </div>
+        `;
+        }
+
+        function getActionButtonsPengiriman(item) {
+            if (item.status !== 'pending') return '<span class="text-slate-400 text-xs">-</span>';
+            return `
+            <div class="flex items-center justify-center gap-2">
+                <button onclick="showApproveModal('pengiriman', ${item.id}, '${item.produk_nama.replace(/'/g, "\\'")}')" class="action-btn bg-emerald-500 hover:bg-emerald-600 text-white px-3 py-1.5 rounded-lg text-xs font-medium flex items-center gap-1">
+                    <i class="fas fa-check text-xs"></i> Setuju
+                </button>
+                <button onclick="showRejectModal('pengiriman', ${item.id}, '${item.produk_nama.replace(/'/g, "\\'")}')" class="action-btn bg-rose-500 hover:bg-rose-600 text-white px-3 py-1.5 rounded-lg text-xs font-medium flex items-center gap-1">
+                    <i class="fas fa-times text-xs"></i> Tolak
+                </button>
+            </div>
+        `;
         }
 
         function renderTabelProduk() {
             const tbody = document.getElementById('tbodyProduk');
+            if (!tbody) return;
             let filtered = getFilteredData(produkData);
             if (filtered.length === 0) {
                 tbody.innerHTML =
@@ -558,55 +608,77 @@
                 return;
             }
             tbody.innerHTML = filtered.map(p => `
-                <tr class="hover:bg-slate-50">
-                    <td class="px-5 py-3">${new Date(p.tanggal).toLocaleDateString('id-ID')}</td>
-                    <td class="px-5 py-3 font-medium">${p.nama}</td>
-                    <td class="px-5 py-3"><span class="px-2 py-0.5 text-xs rounded-full bg-indigo-100 text-indigo-700">${p.kategori}</span></td>
-                    <td class="px-5 py-3 font-semibold text-emerald-600">Rp ${p.harga}</td>
-                    <td class="px-5 py-3">${p.stok} pcs</td></td>
-                    <td class="px-5 py-3">${p.diajukan_oleh}</td></td>
-                    <td class="px-5 py-3">${getStatusBadge(p.status)}</td></td>
-                    <td class="px-5 py-3 text-center">${getActionButtons(p, 'produk', p.id, p.nama)}</td></td>
-                 </tr>
-            `).join('');
+            <tr class="hover:bg-slate-50">
+                <td class="px-5 py-3">${new Date(p.tanggal).toLocaleDateString('id-ID')}</td>
+                <td class="px-5 py-3 font-medium">${p.nama}</td>
+                <td class="px-5 py-3"><span class="px-2 py-0.5 text-xs rounded-full bg-indigo-100 text-indigo-700">${p.kategori}</span></td>
+                <td class="px-5 py-3 font-semibold text-emerald-600">Rp ${p.harga}</td>
+                <td class="px-5 py-3">${p.stok} pcs</td></td>
+                <td class="px-5 py-3">${p.diajukan_oleh}</td></td>
+                <td class="px-5 py-3">${getStatusBadge(p.status)}</td></td>
+                <td class="px-5 py-3 text-center">${getActionButtonsProduk(p)}</td></td>
+              </tr>
+        `).join('');
         }
 
         function renderTabelTambahStok() {
             const tbody = document.getElementById('tbodyTambahStok');
+            if (!tbody) return;
             let filtered = getFilteredData(tambahStokData);
             if (filtered.length === 0) {
                 tbody.innerHTML =
-                    `<tr><td colspan="9" class="text-center py-8 text-slate-400"><i class="fas fa-inbox text-4xl mb-2 block"></i>Tidak ada data</td></tr>`;
+                    `<tr><td colspan="9" class="text-center py-8 text-slate-400"><i class="fas fa-inbox text-4xl mb-2 block"></i>Tidak ada数据</td></tr>`;
                 return;
             }
             tbody.innerHTML = filtered.map(item => `
-                <tr class="hover:bg-slate-50">
-                    <td class="px-5 py-3">${new Date(item.created_at).toLocaleDateString('id-ID')}</td>
-                    <td class="px-5 py-3 font-medium">${item.produk_nama}</td>
-                    <td class="px-5 py-3">${item.stok_sebelum}</td>
-                    <td class="px-5 py-3 text-green-600 font-semibold">+${item.jumlah_request}</td>
-                    <td class="px-5 py-3">${item.stok_sesudah}</td>
-                    <td class="px-5 py-3">${item.supplier || '-'}</td>
-                    <td class="px-5 py-3">${item.requester_name || 'Gudang'}</td>
-                    <td class="px-5 py-3">${getStatusBadge(item.status)}</td></td>
-                    <td class="px-5 py-3 text-center">${getActionButtons(item, 'tambah_stok', item.id, item.produk_nama)}</td></td>
-                 </tr>
-            `).join('');
-        }
-
-        function renderTabelPenerimaan() {
-            document.getElementById('tbodyPenerimaan').innerHTML =
-                `<tr><td colspan="6" class="text-center py-8 text-slate-400">Fitur penerimaan stok akan segera hadir</td></tr>`;
+            <tr class="hover:bg-slate-50">
+                <td class="px-5 py-3">${new Date(item.created_at).toLocaleDateString('id-ID')}</td>
+                <td class="px-5 py-3 font-medium">${item.produk_nama}</td>
+                <td class="px-5 py-3">${item.stok_sebelum}</td>
+                <td class="px-5 py-3 text-green-600 font-semibold">+${item.jumlah_request}</td>
+                <td class="px-5 py-3">${item.stok_sesudah}</td>
+                <td class="px-5 py-3">${item.supplier || '-'}</td>
+                <td class="px-5 py-3">${item.requester_name}</td>
+                <td class="px-5 py-3">${getStatusBadge(item.status)}</td></td>
+                <td class="px-5 py-3 text-center">${getActionButtonsTambahStok(item)}</td></td>
+              </tr>
+        `).join('');
         }
 
         function renderTabelPengiriman() {
-            document.getElementById('tbodyPengiriman').innerHTML =
-                `<tr><td colspan="6" class="text-center py-8 text-slate-400">Fitur pengiriman stok akan segera hadir</td></tr>`;
+            const tbody = document.getElementById('tbodyPengiriman');
+            if (!tbody) return;
+            let filtered = getFilteredData(pengirimanData);
+            if (filtered.length === 0) {
+                tbody.innerHTML =
+                    `<tr><td colspan="9" class="text-center py-8 text-slate-400"><i class="fas fa-inbox text-4xl mb-2 block"></i>Tidak ada数据</td></td>`;
+                return;
+            }
+            tbody.innerHTML = filtered.map(item => `
+            <tr class="hover:bg-slate-50">
+                <td class="px-5 py-3">${new Date(item.created_at).toLocaleDateString('id-ID')}</td>
+                <td class="px-5 py-3 font-mono text-xs font-semibold text-indigo-600">${item.kode}</td>
+                <td class="px-5 py-3 font-medium">${item.produk_nama}</td>
+                <td class="px-5 py-3 text-red-600 font-semibold">-${item.jumlah} pcs</td></td>
+                <td class="px-5 py-3">${item.stok_gudang_sesudah}</td></td>
+                <td class="px-5 py-3">${item.tujuan_toko || '-'}</td></td>
+                <td class="px-5 py-3">${item.requester_name}</td></td>
+                <td class="px-5 py-3">${getStatusBadge(item.status)}</td></td>
+                <td class="px-5 py-3 text-center">${getActionButtonsPengiriman(item)}</td></td>
+              </tr>
+        `).join('');
+        }
+
+        function renderTabelPenerimaan() {
+            const tbody = document.getElementById('tbodyPenerimaan');
+            if (tbody) tbody.innerHTML =
+                `<tr><td colspan="6" class="text-center py-8 text-slate-400">Fitur penerimaan stok akan segera hadir</td></tr>`;
         }
 
         function renderTabelPenyesuaian() {
-            document.getElementById('tbodyPenyesuaian').innerHTML =
-                `<tr><td colspan="7" class="text-center py-8 text-slate-400">Fitur penyesuaian stok akan segera hadir</td></tr>`;
+            const tbody = document.getElementById('tbodyPenyesuaian');
+            if (tbody) tbody.innerHTML =
+                `<td><td colspan="7" class="text-center py-8 text-slate-400">Fitur penyesuaian stok akan segera hadir</td></tr>`;
         }
 
         // Toast functions
@@ -651,8 +723,11 @@
 
         function confirmApprove() {
             if (!currentItemId) return;
-            let url = currentItemType === 'produk' ? `/owner/stok/approval/produk/${currentItemId}/approve` :
-                `/owner/stok/approval/tambah-stok/${currentItemId}/approve`;
+            let url = '';
+            if (currentItemType === 'produk') url = `/owner/stok/approval/produk/${currentItemId}/approve`;
+            else if (currentItemType === 'tambah_stok') url = `/owner/stok/approval/tambah-stok/${currentItemId}/approve`;
+            else if (currentItemType === 'pengiriman') url = `/owner/stok/approval/pengiriman/${currentItemId}/approve`;
+
             fetch(url, {
                     method: 'POST',
                     headers: {
@@ -697,8 +772,12 @@
                 showToast('Alasan penolakan harus diisi!', 'warning');
                 return;
             }
-            let url = currentItemType === 'produk' ? `/owner/stok/approval/produk/${currentItemId}/reject` :
-                `/owner/stok/approval/tambah-stok/${currentItemId}/reject`;
+
+            let url = '';
+            if (currentItemType === 'produk') url = `/owner/stok/approval/produk/${currentItemId}/reject`;
+            else if (currentItemType === 'tambah_stok') url = `/owner/stok/approval/tambah-stok/${currentItemId}/reject`;
+            else if (currentItemType === 'pengiriman') url = `/owner/stok/approval/pengiriman/${currentItemId}/reject`;
+
             fetch(url, {
                     method: 'POST',
                     headers: {
@@ -728,6 +807,7 @@
         // Event listeners
         document.getElementById('confirmApproveBtn').addEventListener('click', confirmApprove);
         document.getElementById('confirmRejectBtn').addEventListener('click', confirmReject);
+
         window.addEventListener('click', function(event) {
             if (event.target === document.getElementById('approveModal')) closeApproveModal();
             if (event.target === document.getElementById('rejectModal')) closeRejectModal();
