@@ -42,6 +42,122 @@
     </div>
 
     <script>
+        function loadCurrentStock() {
+            const select = document.getElementById('produk_id');
+            const selectedOption = select.options[select.selectedIndex];
+            const stok = selectedOption.getAttribute('data-stok') || 0;
+            document.getElementById('stok_saat_ini').value = stok;
+            document.getElementById('stok_saat_ini').setAttribute('data-value', stok);
+            calculateStokSesudah();
+        }
+
+        function calculateStokSesudah() {
+            const stokSaatIni = parseInt(document.getElementById('stok_saat_ini')?.getAttribute('data-value') || 0);
+            const jumlah = parseInt(document.getElementById('jumlah_request')?.value) || 0;
+            document.getElementById('stok_sesudah').value = stokSaatIni + jumlah;
+        }
+
+        function showTambahRequestModal() {
+            document.getElementById('produk_id').value = '';
+            document.getElementById('stok_saat_ini').value = '';
+            document.getElementById('stok_saat_ini').removeAttribute('data-value');
+            document.getElementById('jumlah_request').value = '';
+            document.getElementById('stok_sesudah').value = '';
+            document.getElementById('supplier').value = '';
+            document.getElementById('keterangan').value = '';
+            showModal('modalTambahRequest');
+        }
+
+        function simpanRequest(event) {
+            event.preventDefault();
+
+            const produkId = document.getElementById('produk_id').value;
+            const jumlah = document.getElementById('jumlah_request').value;
+            const supplier = document.getElementById('supplier').value;
+            const keterangan = document.getElementById('keterangan').value;
+
+            if (!produkId) {
+                alert('Pilih produk terlebih dahulu!');
+                return;
+            }
+
+            if (!jumlah || jumlah < 1) {
+                alert('Jumlah request minimal 1!');
+                return;
+            }
+
+            fetch('{{ route('gudang.stok.tambah_stok.store') }}', {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        produk_id: produkId,
+                        jumlah_request: jumlah,
+                        supplier: supplier,
+                        keterangan: keterangan
+                    })
+                })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.success) {
+                        alert(data.message);
+                        closeModal('modalTambahRequest');
+                        location.reload();
+                    } else {
+                        alert(data.message);
+                    }
+                })
+                .catch(err => {
+                    alert('Terjadi kesalahan: ' + err);
+                });
+        }
+
+        function viewDetail(id) {
+            const item = requests.find(r => r.id === id);
+            if (item) {
+                let statusText = '';
+                let statusColor = '';
+                if (item.status === 'pending') {
+                    statusText = 'Menunggu';
+                    statusColor = 'text-yellow-600';
+                } else if (item.status === 'approved') {
+                    statusText = 'Disetujui';
+                    statusColor = 'text-green-600';
+                } else {
+                    statusText = 'Ditolak';
+                    statusColor = 'text-red-600';
+                }
+
+                const detailHtml = `
+            <div class="bg-gray-50 rounded-lg p-3">
+                <p class="text-sm"><strong>ID Request:</strong> #${item.id}</p>
+                <p class="text-sm mt-2"><strong>Produk:</strong> ${item.produk?.nama_produk || '-'}</p>
+                <p class="text-sm mt-2"><strong>Tanggal Request:</strong> ${formatDate(item.created_at)}</p>
+                <p class="text-sm mt-2"><strong>Stok Sebelum:</strong> ${item.stok_sebelum}</p>
+                <p class="text-sm mt-2"><strong>Jumlah Request:</strong> +${item.jumlah_request}</p>
+                <p class="text-sm mt-2"><strong>Stok Sesudah:</strong> ${item.stok_sesudah}</p>
+                <p class="text-sm mt-2"><strong>Supplier:</strong> ${item.supplier || '-'}</p>
+                <p class="text-sm mt-2"><strong>Keterangan:</strong> ${item.keterangan || '-'}</p>
+                <p class="text-sm mt-2"><strong>Status:</strong> <span class="${statusColor}">${statusText}</span></p>
+                ${item.alasan_ditolak ? `<p class="text-sm mt-2 text-red-600"><strong>Alasan Ditolak:</strong> ${item.alasan_ditolak}</p>` : ''}
+            </div>
+        `;
+                document.getElementById('detailContent').innerHTML = detailHtml;
+                showModal('modalDetail');
+            }
+        }
+
+        function showModal(modalId) {
+            document.getElementById(modalId).classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).classList.add('hidden');
+            document.body.style.overflow = 'auto';
+        }
         // Ambil data dari localStorage (yg dikirim gudang)
         let pengajuanPenerimaan = JSON.parse(localStorage.getItem('pengajuanPenerimaan') || '[]');
 

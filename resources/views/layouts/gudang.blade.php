@@ -226,8 +226,9 @@
                         <i id="stokIcon" class="fas fa-chevron-right text-xs rotate-icon"></i>
                     </button>
                     <div id="stokSubmenu" class="submenu-collapse ml-6 mt-1 space-y-1">
-                        <a href="{{ route('gudang.stok.penerimaan') }}"
-                            class="submenu-item flex items-center gap-2 px-4 py-2 rounded-lg text-sm transition-all duration-200 {{ request()->routeIs('gudang.stok.penerimaan') ? 'submenu-active' : 'text-slate-600' }}">
+                        {{-- 🔥 PERBAIKAN: Tambahkan .index --}}
+                        <a href="{{ route('gudang.stok.tambah_stok.index') }}"
+                            class="submenu-item flex items-center gap-2 px-4 py-2 rounded-lg text-sm transition-all duration-200 {{ request()->routeIs('gudang.stok.tambah_stok.index') ? 'submenu-active' : 'text-slate-600' }}">
                             <i class="fas fa-arrow-down w-4 h-4"></i> Tambah Stok
                         </a>
                         <a href="{{ route('gudang.stok.pengiriman') }}"
