@@ -1,3 +1,17 @@
+@php
+    // Cek apakah user sudah login
+    if (!auth()->check()) {
+        header('Location: ' . route('login'));
+        exit();
+    }
+
+    // Cek apakah user memiliki role Owner (case insensitive)
+    $userRole = auth()->user()->role->nama_role ?? '';
+    if (strtolower($userRole) !== 'owner') {
+        abort(403, 'Akses ditolak. Hanya Owner yang dapat mengakses halaman ini.');
+    }
+@endphp
+
 <!DOCTYPE html>
 <html lang="id">
 
@@ -39,6 +53,10 @@
             border-radius: 10px;
         }
 
+        .sidebar-item {
+            transition: all 0.2s ease;
+        }
+
         .sidebar-item:hover {
             background: linear-gradient(90deg, #eef2ff 0%, #ffffff 100%);
             transform: translateX(4px);
@@ -78,18 +96,6 @@
         .submenu-collapse.open {
             max-height: 500px;
             transition: max-height 0.3s ease-in;
-        }
-
-        .card-hover:hover {
-            transform: translateY(-4px);
-            transition: all 0.3s ease;
-            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
-        }
-
-        .product-card:hover {
-            transform: translateY(-2px);
-            transition: all 0.3s ease;
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
         }
 
         @keyframes modalAnim {
@@ -141,63 +147,64 @@
             </div>
 
             <nav class="flex-1 p-4 space-y-1">
+                {{-- Dashboard --}}
                 <a href="{{ route('owner.dashboard') }}"
                     class="sidebar-item flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 {{ request()->routeIs('owner.dashboard') ? 'sidebar-item-active' : 'text-slate-600 hover:bg-slate-50' }}">
                     <i class="fas fa-home w-5 h-5"></i> Beranda
                 </a>
 
-                <!-- Produk Dropdown -->
-                <div>
-                    <a href="{{ route('owner.produk') }}"
-                        class="sidebar-item flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 {{ request()->routeIs('owner.produk') ? 'sidebar-item-active' : 'text-slate-600 hover:bg-slate-50' }}">
-                        <i class="fas fa-box w-5 h-5"></i> Produk
-                    </a>
-                </div>
+                {{-- Produk --}}
+                <a href="{{ route('owner.produk') }}"
+                    class="sidebar-item flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 {{ request()->routeIs('owner.produk') ? 'sidebar-item-active' : 'text-slate-600 hover:bg-slate-50' }}">
+                    <i class="fas fa-box w-5 h-5"></i> Produk
+                </a>
 
-                <!-- Stok Dropdown -->
+                {{-- Stok & Approval Dropdown --}}
                 <div>
                     <button onclick="toggleSubmenu('stokSubmenu', 'stokIcon')"
-                        class="sidebar-item flex items-center justify-between w-full px-4 py-3 rounded-xl transition-all duration-200">
-                        <div class="flex items-center gap-3"><i class="fas fa-warehouse w-5 h-5"></i><span>Stok</span>
+                        class="sidebar-item flex items-center justify-between w-full px-4 py-3 rounded-xl transition-all duration-200 text-slate-600 hover:bg-slate-50">
+                        <div class="flex items-center gap-3">
+                            <i class="fas fa-warehouse w-5 h-5"></i>
+                            <span>Approval</span>
                         </div>
                         <i id="stokIcon" class="fas fa-chevron-right text-xs rotate-icon"></i>
                     </button>
                     <div id="stokSubmenu" class="submenu-collapse ml-6 mt-1 space-y-1">
-                        <a href="{{ route('owner.stok.penerimaan') }}"
+                        <a href="{{ route('owner.stok.approval') }}"
                             class="submenu-item flex items-center gap-2 px-4 py-2 rounded-lg text-sm transition-all duration-200 text-slate-600 hover:bg-slate-50">
-                            <i class="fas fa-arrow-down w-4 h-4"></i> Penerimaan
-                        </a>
-                        <a href="{{ route('owner.stok.pengiriman') }}"
-                            class="submenu-item flex items-center gap-2 px-4 py-2 rounded-lg text-sm transition-all duration-200 text-slate-600 hover:bg-slate-50">
-                            <i class="fas fa-arrow-up w-4 h-4"></i> Pengiriman
-                        </a>
-                        <a href="{{ route('owner.stok.persetujuan') }}"
-                            class="submenu-item flex items-center gap-2 px-4 py-2 rounded-lg text-sm transition-all duration-200 text-slate-600 hover:bg-slate-50">
-                            <i class="fas fa-check-circle w-4 h-4"></i> Persetujuan
+                            <i class="fas fa-check-double w-4 h-4"></i> Approval Aktivitas Gudang
                         </a>
                         <a href="{{ route('owner.stok.laporan') }}"
                             class="submenu-item flex items-center gap-2 px-4 py-2 rounded-lg text-sm transition-all duration-200 text-slate-600 hover:bg-slate-50">
-                            <i class="fas fa-file-alt w-4 h-4"></i> Laporan Stok
+                            <i class="fas fa-file-alt w-4 h-4"></i> Laporan
                         </a>
                     </div>
                 </div>
 
+                {{-- Riwayat Transaksi --}}
                 <a href="{{ route('owner.riwayat_transaksi') }}"
                     class="sidebar-item flex items-center gap-3 px-4 py-3 rounded-xl text-slate-600 hover:bg-slate-50 transition">
                     <i class="fas fa-history w-5 h-5"></i> Riwayat Transaksi
                 </a>
+
+                {{-- Laporan Penjualan --}}
                 <a href="{{ route('owner.laporan_penjualan') }}"
                     class="sidebar-item flex items-center gap-3 px-4 py-3 rounded-xl text-slate-600 hover:bg-slate-50 transition">
                     <i class="fas fa-chart-line w-5 h-5"></i> Laporan Penjualan
                 </a>
-                <a href="{{ route('owner.pengguna') }}"
+
+                {{-- Pengguna --}}
+                <a href="{{ route('owner.pengguna.index') }}"
                     class="sidebar-item flex items-center gap-3 px-4 py-3 rounded-xl text-slate-600 hover:bg-slate-50 transition">
                     <i class="fas fa-users w-5 h-5"></i> Pengguna
                 </a>
             </nav>
 
-            {{-- TOMBOL KELUAR dengan modal confirmation --}}
+            {{-- TOMBOL KELUAR --}}
             <div class="p-4 border-t border-slate-200">
+                <form id="logout-form" action="{{ route('logout') }}" method="POST" style="display: none;">
+                    @csrf
+                </form>
                 <button onclick="showLogoutConfirm()"
                     class="flex items-center gap-3 px-4 py-3 rounded-xl text-red-600 hover:bg-red-50 transition-all duration-200 w-full">
                     <i class="fas fa-sign-out-alt w-5 h-5"></i>
@@ -212,7 +219,12 @@
                 <div class="flex justify-between items-center">
                     <div>
                         <h2 class="text-2xl font-semibold text-slate-800">@yield('header-title', 'Dashboard')</h2>
-                        <p class="text-sm text-slate-500 mt-0.5">@yield('header-subtitle', 'Selamat datang, Owner!')</p>
+                        <p class="text-sm text-slate-500 mt-0.5">@yield('header-subtitle', 'Selamat datang, ' . auth()->user()->name . '!')</p>
+                    </div>
+                    <div class="flex items-center gap-3">
+                        <span class="text-sm text-slate-600">
+                            <i class="fas fa-user-circle mr-1"></i> {{ auth()->user()->name }}
+                        </span>
                     </div>
                 </div>
             </div>
@@ -230,7 +242,6 @@
             }
         }
 
-        // Modal Functions
         function showModal(modalId) {
             const modal = document.getElementById(modalId);
             if (modal) {
@@ -315,7 +326,6 @@
             }
         }
 
-        // LOGOUT CONFIRMATION FUNCTION
         function showLogoutConfirm() {
             const modal = document.getElementById('modalLogoutConfirm');
             if (modal) {
@@ -325,15 +335,10 @@
         }
 
         function confirmLogout() {
-            // Sembunyikan modal
             closeModal('modalLogoutConfirm');
-
-            // Tampilkan loading sebentar lalu redirect ke login
             showLoading('Logging out...');
-
             setTimeout(() => {
-                // Redirect ke halaman login
-                window.location.href = '{{ route('login') }}';
+                document.getElementById('logout-form').submit();
             }, 1000);
         }
 
@@ -353,13 +358,18 @@
                 document.body.style.overflow = 'auto';
             }
         }
+
+        window.onclick = function(event) {
+            if (event.target.classList && event.target.classList.contains('fixed')) {
+                event.target.classList.add('hidden');
+                document.body.style.overflow = 'auto';
+            }
+        }
     </script>
 
     @stack('scripts')
 
     {{-- MODAL COMPONENTS --}}
-
-    <!-- Modal Success -->
     <div id="modalSuccess" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 hidden">
         <div class="bg-white rounded-2xl shadow-xl w-full max-w-sm mx-4 p-6 text-center animate-modal">
             <div class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
@@ -372,7 +382,6 @@
         </div>
     </div>
 
-    <!-- Modal Error -->
     <div id="modalError" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 hidden">
         <div class="bg-white rounded-2xl shadow-xl w-full max-w-sm mx-4 p-6 text-center animate-modal">
             <div class="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
@@ -385,7 +394,6 @@
         </div>
     </div>
 
-    <!-- Modal Warning -->
     <div id="modalWarning" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 hidden">
         <div class="bg-white rounded-2xl shadow-xl w-full max-w-sm mx-4 p-6 text-center animate-modal">
             <div class="w-16 h-16 bg-yellow-100 rounded-full flex items-center justify-center mx-auto mb-4">
@@ -398,7 +406,6 @@
         </div>
     </div>
 
-    <!-- Modal Info -->
     <div id="modalInfo" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 hidden">
         <div class="bg-white rounded-2xl shadow-xl w-full max-w-sm mx-4 p-6 text-center animate-modal">
             <div class="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
@@ -411,7 +418,6 @@
         </div>
     </div>
 
-    <!-- Modal Confirm Delete -->
     <div id="modalConfirmDelete" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 hidden">
         <div class="bg-white rounded-2xl shadow-xl w-full max-w-md mx-4 animate-modal">
             <div class="p-6">
@@ -433,7 +439,6 @@
         </div>
     </div>
 
-    <!-- Modal Loading -->
     <div id="modalLoading" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 hidden">
         <div class="bg-white rounded-2xl shadow-xl w-full max-w-xs mx-4 p-6 text-center animate-modal">
             <div
@@ -443,7 +448,6 @@
         </div>
     </div>
 
-    {{-- ==================== MODAL KONFIRMASI LOGOUT ==================== --}}
     <div id="modalLogoutConfirm" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 hidden">
         <div class="bg-white rounded-2xl shadow-xl w-full max-w-md mx-4 animate-modal">
             <div class="p-6">
@@ -456,7 +460,6 @@
                         <p class="text-sm text-slate-500">Apakah Anda yakin ingin keluar?</p>
                     </div>
                 </div>
-
                 <div class="bg-amber-50 border border-amber-200 rounded-xl p-4 mb-6">
                     <div class="flex items-start gap-3">
                         <i class="fas fa-exclamation-triangle text-amber-500 mt-0.5"></i>
@@ -467,7 +470,6 @@
                         </div>
                     </div>
                 </div>
-
                 <div class="flex justify-end gap-3">
                     <button onclick="closeModal('modalLogoutConfirm')"
                         class="px-5 py-2.5 border border-slate-300 rounded-lg text-slate-700 hover:bg-slate-50 transition font-medium">

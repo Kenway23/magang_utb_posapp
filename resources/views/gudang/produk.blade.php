@@ -1,742 +1,563 @@
 @extends('layouts.gudang')
 
 @section('title', 'Manajemen Produk - PROShop')
-@section('header-title', 'Manajemen Produk')
-@section('header-subtitle', 'Kelola data produk (Tambah, Edit, Hapus)')
+@section('page-title', 'Manajemen Produk')
+@section('page-subtitle', 'Kelola data produk (Tambah, Edit, Hapus)')
 
 @section('content')
-    <div x-data="produkApp()" x-init="init()" x-cloak>
+    <div>
         <div class="space-y-6">
-
             <!-- Tombol Tambah & Pencarian -->
             <div class="bg-white rounded-xl shadow-sm p-4 flex justify-between items-center flex-wrap gap-3">
-                <button @click="openModal()"
+                <button onclick="showTambahProdukModal()"
                     class="bg-indigo-600 text-white px-5 py-2 rounded-lg hover:bg-indigo-700 transition flex items-center gap-2">
                     <i class="fas fa-plus"></i> Tambah Produk
                 </button>
                 <div class="relative">
                     <i class="fas fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
-                    <input type="text" x-model="search" @input="filterProduk" placeholder="Cari produk..."
+                    <input type="text" id="searchProduk" onkeyup="filterProdukTable()" placeholder="Cari produk..."
                         class="pl-10 pr-4 py-2 border rounded-lg w-64 focus:outline-none focus:ring-2 focus:ring-indigo-400">
                 </div>
             </div>
 
-            <!-- Filter Kategori (13 Kategori) -->
-            <div class="bg-white rounded-xl shadow-sm p-4">
-                <div class="flex flex-wrap gap-2">
-                    <template x-for="cat in categories" :key="cat.name">
-                        <button @click="selectedCategory = cat.name; filterProduk()"
-                            :class="selectedCategory === cat.name ? cat.color + ' text-white' :
-                                'bg-gray-200 text-gray-700 hover:bg-gray-300'"
-                            class="px-3 py-2 rounded-lg text-xs font-medium transition whitespace-nowrap">
-                            <i :class="cat.icon" class="mr-1"></i>
-                            <span x-text="cat.name"></span>
-                        </button>
-                    </template>
+            <!-- Filter Status -->
+            <div class="bg-white rounded-xl shadow-sm p-4 flex flex-wrap gap-3 items-center">
+                <span class="text-sm font-medium text-gray-700">Filter Status:</span>
+                <select id="filterStatus" onchange="filterProdukTable()" class="px-3 py-1.5 border rounded-lg text-sm">
+                    <option value="all">Semua</option>
+                    <option value="pending">Menunggu Approve</option>
+                    <option value="approved">Disetujui</option>
+                    <option value="rejected">Ditolak</option>
+                </select>
+                <div class="ml-auto text-sm text-gray-500">
+                    <i class="fas fa-info-circle"></i> Produk yang sudah disetujui tidak dapat diedit/dihapus
                 </div>
             </div>
 
             <!-- GRID PRODUK -->
-            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
-                <template x-for="product in filteredProducts" :key="product.id">
-                    <div class="bg-white rounded-xl shadow-sm overflow-hidden hover:shadow-md transition-all duration-200 border-t-4"
-                        :class="product.borderTopColor">
-
-                        <!-- Header Card -->
-                        <div class="p-4" :class="product.bgLight">
-                            <div class="flex justify-between items-start">
-                                <div class="w-14 h-14 rounded-xl flex items-center justify-center text-white text-2xl"
-                                    :class="product.bgColor">
-                                    <i class="fas fa-box"></i>
-                                </div>
-                                <span class="text-xs px-2 py-1 rounded-full text-white" :class="product.badgeColor"
-                                    x-text="product.category"></span>
-                            </div>
-                            <h3 class="font-bold text-lg text-gray-800 mt-3" x-text="product.name"></h3>
-                            <div class="text-2xl font-bold mt-2" :class="product.priceColor">
-                                Rp <span x-text="formatPrice(product.price)"></span>
-                            </div>
-                        </div>
-
-                        <!-- Footer Card -->
-                        <div class="p-4 border-t flex justify-between items-center" :class="product.borderColor">
-                            <div class="flex items-center gap-2">
-                                <i class="fas fa-boxes text-gray-400"></i>
-                                <span class="text-sm"
-                                    :class="product.stock <= 5 ? 'text-red-600 font-bold' : 'text-gray-600'">
-                                    Stok: <span x-text="product.stock"></span>
-                                </span>
-                                <span x-show="product.stock <= 5" class="text-red-500 text-sm">⚠️</span>
-                            </div>
-                            <div class="flex gap-2">
-                                <button @click="editProduct(product)"
-                                    class="text-blue-600 hover:text-blue-800 transition p-1">
-                                    <i class="fas fa-edit"></i>
-                                </button>
-                                <button @click="confirmDelete(product)"
-                                    class="text-red-600 hover:text-red-800 transition p-1">
-                                    <i class="fas fa-trash-alt"></i>
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                </template>
-
-                <div x-show="filteredProducts.length === 0" class="col-span-full text-center py-16 text-gray-400">
-                    <i class="fas fa-box-open text-6xl mb-3 block"></i>
-                    <p class="text-lg">Belum ada produk</p>
-                    <p class="text-sm mt-1">Klik tombol "Tambah Produk" untuk menambahkan</p>
-                </div>
+            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5" id="produkGrid">
             </div>
 
-            <div class="bg-white rounded-xl shadow-sm p-4 flex justify-between items-center">
+            <!-- Statistik -->
+            <div class="bg-white rounded-xl shadow-sm p-4 flex justify-between items-center flex-wrap gap-3">
                 <div class="text-sm text-gray-500">
-                    <i class="fas fa-chart-line mr-1"></i> Total <span x-text="filteredProducts.length"></span> produk
+                    <i class="fas fa-chart-line mr-1"></i> Total <span id="totalProduk">0</span> produk
                 </div>
                 <div class="text-sm text-gray-500">
                     <i class="fas fa-money-bill-wave mr-1"></i> Total nilai inventaris: Rp <span
-                        x-text="formatPrice(totalInventoryValue)"></span>
+                        id="totalInventaris">0</span>
+                </div>
+                <div class="text-sm text-gray-500">
+                    <i class="fas fa-clock mr-1 text-yellow-500"></i> Menunggu Approve: <span id="pendingCount">0</span>
+                </div>
+                <div class="text-sm text-gray-500">
+                    <i class="fas fa-exclamation-triangle mr-1 text-amber-500"></i> Stok menipis: <span
+                        id="lowStockCount">0</span>
                 </div>
             </div>
         </div>
 
         <!-- MODAL TAMBAH/EDIT PRODUK -->
-        <div x-show="showModal" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50" x-cloak>
+        <div id="modalProduk" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 hidden">
             <div class="bg-white rounded-xl max-w-md w-full mx-4">
-                <div class="p-5 border-b flex justify-between items-center" :class="modalHeaderColor">
-                    <h3 class="font-bold text-lg" x-text="modalTitle"></h3>
-                    <button @click="closeModal()" class="text-gray-400 hover:text-gray-600"><i
-                            class="fas fa-times"></i></button>
+                <div class="p-5 border-b flex justify-between items-center">
+                    <h3 class="font-bold text-lg" id="modalTitle">Tambah Produk</h3>
+                    <button onclick="closeModal('modalProduk')" class="text-gray-400 hover:text-gray-600">
+                        <i class="fas fa-times"></i>
+                    </button>
                 </div>
-                <form @submit.prevent="saveProduct">
+                <form onsubmit="saveProduct(event)">
                     <div class="p-5 space-y-4">
+                        <input type="hidden" id="produkId">
                         <div>
                             <label class="block text-sm font-medium mb-1">Nama Produk <span
                                     class="text-red-500">*</span></label>
-                            <input type="text" x-model="form.name" required
+                            <input type="text" id="namaProduk" required
                                 class="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-400">
                         </div>
                         <div>
                             <label class="block text-sm font-medium mb-1">Kategori</label>
-                            <select x-model="form.category" @change="updateCategoryColor"
+                            <select id="kategoriId" required
                                 class="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-400">
-                                <option value="Makanan">🍚 Makanan</option>
-                                <option value="Minuman">🥤 Minuman</option>
-                                <option value="Makanan Ringan">🍿 Makanan Ringan</option>
-                                <option value="Produk Kesehatan">💊 Produk Kesehatan</option>
-                                <option value="Produk Kebersihan">🧼 Produk Kebersihan</option>
-                                <option value="Kebutuhan Harian">📦 Kebutuhan Harian</option>
-                                <option value="Makanan Siap Saji">🍔 Makanan Siap Saji</option>
-                                <option value="Produk Segar & Beku">❄️ Produk Segar & Beku</option>
-                                <option value="Kebutuhan Ibu & Anak">👶 Kebutuhan Ibu & Anak</option>
-                                <option value="Makanan Hewan">🐕 Makanan Hewan</option>
-                                <option value="Mainan">🎮 Mainan</option>
-                                <option value="Kecantikan">💄 Kecantikan</option>
-                                <option value="Perawatan Diri">🧴 Perawatan Diri</option>
+                                <option value="">-- Pilih Kategori --</option>
+                                @foreach ($kategori as $kat)
+                                    <option value="{{ $kat->kategori_id }}">{{ $kat->nama_kategori }}</option>
+                                @endforeach
                             </select>
                         </div>
                         <div>
                             <label class="block text-sm font-medium mb-1">Harga (Rp)</label>
-                            <input type="number" x-model="form.price" required min="0"
+                            <input type="number" id="harga" required min="0" step="100"
                                 class="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-400">
                         </div>
                         <div>
-                            <label class="block text-sm font-medium mb-1">Stok</label>
-                            <input type="number" x-model="form.stock" required min="0"
+                            <label class="block text-sm font-medium mb-1">Stok Gudang <span
+                                    class="text-red-500">*</span></label>
+                            <input type="number" id="stokGudang" required min="10" value="10"
                                 class="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-400">
+                            <p class="text-xs text-gray-500 mt-1">Stok awal di gudang (minimal 10 untuk produk baru)</p>
                         </div>
 
-                        <!-- Preview Warna -->
+                        <!-- Preview Gambar -->
                         <div class="bg-gray-50 rounded-lg p-3">
-                            <p class="text-xs text-gray-500 mb-2">Preview warna kategori:</p>
-                            <div class="flex items-center gap-3">
-                                <div class="w-8 h-8 rounded-lg" :class="previewColor.bg"></div>
-                                <span class="text-sm" x-text="previewColor.name"></span>
+                            <p class="text-xs text-gray-500 mb-2">Upload Gambar (Opsional)</p>
+                            <input type="file" id="gambarProduk" accept="image/*" class="w-full text-sm"
+                                onchange="previewImage(this)">
+                            <div id="previewGambar" class="mt-2 hidden">
+                                <img id="previewImg" class="w-20 h-20 object-cover rounded-lg">
                             </div>
                         </div>
                     </div>
                     <div class="p-5 border-t flex gap-3">
-                        <button type="submit" class="flex-1 text-white py-2 rounded-lg transition"
-                            :class="submitButtonColor">
-                            <i class="fas fa-save mr-1"></i> Simpan
+                        <button type="submit"
+                            class="flex-1 bg-indigo-600 text-white py-2 rounded-lg hover:bg-indigo-700 transition">
+                            <i class="fas fa-save mr-1"></i> Simpan & Kirim Approve
                         </button>
-                        <button type="button" @click="closeModal()"
-                            class="flex-1 bg-gray-200 py-2 rounded-lg hover:bg-gray-300">Batal</button>
+                        <button type="button" onclick="closeModal('modalProduk')"
+                            class="flex-1 bg-gray-200 py-2 rounded-lg hover:bg-gray-300 transition">Batal</button>
                     </div>
                 </form>
             </div>
         </div>
 
+        <!-- MODAL DETAIL PENOLAKAN -->
+        <div id="modalRejectReason" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 hidden">
+            <div class="bg-white rounded-xl max-w-md w-full mx-4 p-6">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-lg font-bold text-red-600"><i class="fas fa-times-circle mr-2"></i>Alasan Penolakan</h3>
+                    <button onclick="closeModal('modalRejectReason')" class="text-gray-400 hover:text-gray-600">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                <p id="rejectReasonText" class="text-gray-600 p-3 bg-red-50 rounded-lg"></p>
+                <div class="flex justify-end mt-4">
+                    <button onclick="closeModal('modalRejectReason')"
+                        class="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700">Tutup</button>
+                </div>
+            </div>
+        </div>
+
         <!-- MODAL KONFIRMASI HAPUS -->
-        <div x-show="showDeleteModal" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50" x-cloak>
+        <div id="modalHapus" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 hidden">
             <div class="bg-white rounded-xl max-w-sm w-full mx-4 p-6 text-center">
                 <div class="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
                     <i class="fas fa-trash-alt text-red-500 text-2xl"></i>
                 </div>
                 <h3 class="text-xl font-bold mb-2">Hapus Produk?</h3>
-                <p class="text-gray-500 mb-4">Yakin ingin menghapus "<span x-text="productToDelete?.name"
-                        class="font-bold text-red-600"></span>"?</p>
+                <p class="text-gray-500 mb-4">Yakin ingin menghapus "<span id="deleteProductName"></span>"?</p>
                 <div class="flex gap-3">
-                    <button @click="deleteProduct()" class="flex-1 bg-red-600 text-white py-2 rounded-lg">Hapus</button>
-                    <button @click="showDeleteModal = false" class="flex-1 bg-gray-200 py-2 rounded-lg">Batal</button>
+                    <button onclick="confirmDeleteProduct()"
+                        class="flex-1 bg-red-600 text-white py-2 rounded-lg hover:bg-red-700">Hapus</button>
+                    <button onclick="closeModal('modalHapus')"
+                        class="flex-1 bg-gray-200 py-2 rounded-lg hover:bg-gray-300">Batal</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- TOAST NOTIFICATION -->
+        <div id="toast" class="fixed top-5 right-5 z-50 hidden transition-all duration-300">
+            <div class="bg-white rounded-lg shadow-lg p-4 min-w-[300px] border-l-4" id="toastContent">
+                <div class="flex items-center gap-3">
+                    <div id="toastIcon"></div>
+                    <div class="flex-1">
+                        <p id="toastMessage" class="text-sm font-medium"></p>
+                    </div>
+                    <button onclick="hideToast()" class="text-gray-400 hover:text-gray-600">
+                        <i class="fas fa-times"></i>
+                    </button>
                 </div>
             </div>
         </div>
     </div>
 
     <script>
-        function produkApp() {
-            return {
-                products: [],
-                filteredProducts: [],
-                search: '',
-                selectedCategory: 'Semua',
-                categories: [{
-                        name: 'Semua',
-                        icon: 'fas fa-th-large',
-                        color: 'bg-gray-600'
-                    },
-                    {
-                        name: 'Makanan',
-                        icon: 'fas fa-utensils',
-                        color: 'bg-red-600'
-                    },
-                    {
-                        name: 'Minuman',
-                        icon: 'fas fa-mug-hot',
-                        color: 'bg-blue-600'
-                    },
-                    {
-                        name: 'Makanan Ringan',
-                        icon: 'fas fa-cookie-bite',
-                        color: 'bg-yellow-600'
-                    },
-                    {
-                        name: 'Produk Kesehatan',
-                        icon: 'fas fa-heartbeat',
-                        color: 'bg-green-600'
-                    },
-                    {
-                        name: 'Produk Kebersihan',
-                        icon: 'fas fa-soap',
-                        color: 'bg-cyan-600'
-                    },
-                    {
-                        name: 'Kebutuhan Harian',
-                        icon: 'fas fa-home',
-                        color: 'bg-purple-600'
-                    },
-                    {
-                        name: 'Makanan Siap Saji',
-                        icon: 'fas fa-hamburger',
-                        color: 'bg-orange-600'
-                    },
-                    {
-                        name: 'Produk Segar & Beku',
-                        icon: 'fas fa-snowflake',
-                        color: 'bg-teal-600'
-                    },
-                    {
-                        name: 'Kebutuhan Ibu & Anak',
-                        icon: 'fas fa-baby-carriage',
-                        color: 'bg-pink-600'
-                    },
-                    {
-                        name: 'Makanan Hewan',
-                        icon: 'fas fa-paw',
-                        color: 'bg-amber-600'
-                    },
-                    {
-                        name: 'Mainan',
-                        icon: 'fas fa-gamepad',
-                        color: 'bg-lime-600'
-                    },
-                    {
-                        name: 'Kecantikan',
-                        icon: 'fas fa-female',
-                        color: 'bg-rose-600'
-                    },
-                    {
-                        name: 'Perawatan Diri',
-                        icon: 'fas fa-spa',
-                        color: 'bg-emerald-600'
-                    }
-                ],
-                showModal: false,
-                showDeleteModal: false,
-                modalTitle: 'Tambah Produk',
-                isEdit: false,
-                form: {
-                    id: null,
-                    name: '',
-                    category: 'Makanan',
-                    price: 0,
-                    stock: 0
-                },
-                productToDelete: null,
+        let products = [];
+        let deleteId = null;
 
-                // Warna per kategori (13 Kategori)
-                categoryColors: {
-                    'Makanan': {
-                        bg: 'bg-red-600',
-                        bgLight: 'bg-red-50',
-                        borderTop: 'border-t-red-600',
-                        border: 'border-red-100',
-                        badge: 'bg-red-600',
-                        price: 'text-red-600',
-                        modalHeader: 'border-red-200',
-                        submitBtn: 'bg-red-600 hover:bg-red-700',
-                        preview: {
-                            bg: 'bg-red-600',
-                            name: 'Merah (Makanan)'
-                        }
-                    },
-                    'Minuman': {
-                        bg: 'bg-blue-600',
-                        bgLight: 'bg-blue-50',
-                        borderTop: 'border-t-blue-600',
-                        border: 'border-blue-100',
-                        badge: 'bg-blue-600',
-                        price: 'text-blue-600',
-                        modalHeader: 'border-blue-200',
-                        submitBtn: 'bg-blue-600 hover:bg-blue-700',
-                        preview: {
-                            bg: 'bg-blue-600',
-                            name: 'Biru (Minuman)'
-                        }
-                    },
-                    'Makanan Ringan': {
-                        bg: 'bg-yellow-600',
-                        bgLight: 'bg-yellow-50',
-                        borderTop: 'border-t-yellow-600',
-                        border: 'border-yellow-100',
-                        badge: 'bg-yellow-600',
-                        price: 'text-yellow-600',
-                        modalHeader: 'border-yellow-200',
-                        submitBtn: 'bg-yellow-600 hover:bg-yellow-700',
-                        preview: {
-                            bg: 'bg-yellow-600',
-                            name: 'Kuning (Makanan Ringan)'
-                        }
-                    },
-                    'Produk Kesehatan': {
-                        bg: 'bg-green-600',
-                        bgLight: 'bg-green-50',
-                        borderTop: 'border-t-green-600',
-                        border: 'border-green-100',
-                        badge: 'bg-green-600',
-                        price: 'text-green-600',
-                        modalHeader: 'border-green-200',
-                        submitBtn: 'bg-green-600 hover:bg-green-700',
-                        preview: {
-                            bg: 'bg-green-600',
-                            name: 'Hijau (Produk Kesehatan)'
-                        }
-                    },
-                    'Produk Kebersihan': {
-                        bg: 'bg-cyan-600',
-                        bgLight: 'bg-cyan-50',
-                        borderTop: 'border-t-cyan-600',
-                        border: 'border-cyan-100',
-                        badge: 'bg-cyan-600',
-                        price: 'text-cyan-600',
-                        modalHeader: 'border-cyan-200',
-                        submitBtn: 'bg-cyan-600 hover:bg-cyan-700',
-                        preview: {
-                            bg: 'bg-cyan-600',
-                            name: 'Cyan (Produk Kebersihan)'
-                        }
-                    },
-                    'Kebutuhan Harian': {
-                        bg: 'bg-purple-600',
-                        bgLight: 'bg-purple-50',
-                        borderTop: 'border-t-purple-600',
-                        border: 'border-purple-100',
-                        badge: 'bg-purple-600',
-                        price: 'text-purple-600',
-                        modalHeader: 'border-purple-200',
-                        submitBtn: 'bg-purple-600 hover:bg-purple-700',
-                        preview: {
-                            bg: 'bg-purple-600',
-                            name: 'Ungu (Kebutuhan Harian)'
-                        }
-                    },
-                    'Makanan Siap Saji': {
-                        bg: 'bg-orange-600',
-                        bgLight: 'bg-orange-50',
-                        borderTop: 'border-t-orange-600',
-                        border: 'border-orange-100',
-                        badge: 'bg-orange-600',
-                        price: 'text-orange-600',
-                        modalHeader: 'border-orange-200',
-                        submitBtn: 'bg-orange-600 hover:bg-orange-700',
-                        preview: {
-                            bg: 'bg-orange-600',
-                            name: 'Oranye (Makanan Siap Saji)'
-                        }
-                    },
-                    'Produk Segar & Beku': {
-                        bg: 'bg-teal-600',
-                        bgLight: 'bg-teal-50',
-                        borderTop: 'border-t-teal-600',
-                        border: 'border-teal-100',
-                        badge: 'bg-teal-600',
-                        price: 'text-teal-600',
-                        modalHeader: 'border-teal-200',
-                        submitBtn: 'bg-teal-600 hover:bg-teal-700',
-                        preview: {
-                            bg: 'bg-teal-600',
-                            name: 'Teal (Produk Segar & Beku)'
-                        }
-                    },
-                    'Kebutuhan Ibu & Anak': {
-                        bg: 'bg-pink-600',
-                        bgLight: 'bg-pink-50',
-                        borderTop: 'border-t-pink-600',
-                        border: 'border-pink-100',
-                        badge: 'bg-pink-600',
-                        price: 'text-pink-600',
-                        modalHeader: 'border-pink-200',
-                        submitBtn: 'bg-pink-600 hover:bg-pink-700',
-                        preview: {
-                            bg: 'bg-pink-600',
-                            name: 'Pink (Kebutuhan Ibu & Anak)'
-                        }
-                    },
-                    'Makanan Hewan': {
-                        bg: 'bg-amber-600',
-                        bgLight: 'bg-amber-50',
-                        borderTop: 'border-t-amber-600',
-                        border: 'border-amber-100',
-                        badge: 'bg-amber-600',
-                        price: 'text-amber-600',
-                        modalHeader: 'border-amber-200',
-                        submitBtn: 'bg-amber-600 hover:bg-amber-700',
-                        preview: {
-                            bg: 'bg-amber-600',
-                            name: 'Amber (Makanan Hewan)'
-                        }
-                    },
-                    'Mainan': {
-                        bg: 'bg-lime-600',
-                        bgLight: 'bg-lime-50',
-                        borderTop: 'border-t-lime-600',
-                        border: 'border-lime-100',
-                        badge: 'bg-lime-600',
-                        price: 'text-lime-600',
-                        modalHeader: 'border-lime-200',
-                        submitBtn: 'bg-lime-600 hover:bg-lime-700',
-                        preview: {
-                            bg: 'bg-lime-600',
-                            name: 'Hijau Muda (Mainan)'
-                        }
-                    },
-                    'Kecantikan': {
-                        bg: 'bg-rose-600',
-                        bgLight: 'bg-rose-50',
-                        borderTop: 'border-t-rose-600',
-                        border: 'border-rose-100',
-                        badge: 'bg-rose-600',
-                        price: 'text-rose-600',
-                        modalHeader: 'border-rose-200',
-                        submitBtn: 'bg-rose-600 hover:bg-rose-700',
-                        preview: {
-                            bg: 'bg-rose-600',
-                            name: 'Merah Muda (Kecantikan)'
-                        }
-                    },
-                    'Perawatan Diri': {
-                        bg: 'bg-emerald-600',
-                        bgLight: 'bg-emerald-50',
-                        borderTop: 'border-t-emerald-600',
-                        border: 'border-emerald-100',
-                        badge: 'bg-emerald-600',
-                        price: 'text-emerald-600',
-                        modalHeader: 'border-emerald-200',
-                        submitBtn: 'bg-emerald-600 hover:bg-emerald-700',
-                        preview: {
-                            bg: 'bg-emerald-600',
-                            name: 'Hijau Zamrud (Perawatan Diri)'
-                        }
-                    }
-                },
+        document.addEventListener('DOMContentLoaded', function() {
+            loadProducts();
+        });
 
-                get modalHeaderColor() {
-                    return this.categoryColors[this.form.category]?.modalHeader || 'border-gray-200';
-                },
-                get submitButtonColor() {
-                    return this.categoryColors[this.form.category]?.submitBtn || 'bg-indigo-600 hover:bg-indigo-700';
-                },
-                get previewColor() {
-                    return this.categoryColors[this.form.category]?.preview || {
-                        bg: 'bg-gray-600',
-                        name: 'Abu-abu'
-                    };
-                },
-
-                formatPrice(price) {
-                    return new Intl.NumberFormat('id-ID').format(price);
-                },
-
-                filterProduk() {
-                    let filtered = [...this.products];
-                    if (this.selectedCategory !== 'Semua') {
-                        filtered = filtered.filter(p => p.category === this.selectedCategory);
-                    }
-                    if (this.search) {
-                        filtered = filtered.filter(p => p.name.toLowerCase().includes(this.search.toLowerCase()));
-                    }
-                    this.filteredProducts = filtered;
-                },
-
-                updateCategoryColor() {
-                    this.$forceUpdate();
-                },
-
-                init() {
-                    let saved = localStorage.getItem('products_pos');
-                    if (saved) {
-                        this.products = JSON.parse(saved);
+        function loadProducts() {
+            fetch('/gudang/produk/data')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        products = data.data;
+                        renderProdukGrid();
                     } else {
-                        this.products = [
-                            // Makanan (Merah)
-                            {
-                                id: 1,
-                                name: 'Indomie Goreng',
-                                category: 'Makanan',
-                                price: 3800,
-                                stock: 108
-                            },
-                            {
-                                id: 2,
-                                name: 'Indomie Kuah',
-                                category: 'Makanan',
-                                price: 3800,
-                                stock: 75
-                            },
-                            // Minuman (Biru)
-                            {
-                                id: 3,
-                                name: 'Teh Botol Sosro',
-                                category: 'Minuman',
-                                price: 5000,
-                                stock: 85
-                            },
-                            {
-                                id: 4,
-                                name: 'Aqua 600ml',
-                                category: 'Minuman',
-                                price: 4000,
-                                stock: 120
-                            },
-                            // Makanan Ringan (Kuning)
-                            {
-                                id: 5,
-                                name: 'Pocky Coklat',
-                                category: 'Makanan Ringan',
-                                price: 7900,
-                                stock: 80
-                            },
-                            {
-                                id: 6,
-                                name: 'Roma Kelapa',
-                                category: 'Makanan Ringan',
-                                price: 6000,
-                                stock: 65
-                            },
-                            // Produk Kesehatan (Hijau)
-                            {
-                                id: 7,
-                                name: 'Paracetamol',
-                                category: 'Produk Kesehatan',
-                                price: 5000,
-                                stock: 50
-                            },
-                            {
-                                id: 8,
-                                name: 'Promag',
-                                category: 'Produk Kesehatan',
-                                price: 5500,
-                                stock: 45
-                            },
-                            // Produk Kebersihan (Cyan)
-                            {
-                                id: 9,
-                                name: 'Sabun Lifebuoy',
-                                category: 'Produk Kebersihan',
-                                price: 3500,
-                                stock: 45
-                            },
-                            // Kebutuhan Harian (Ungu)
-                            {
-                                id: 10,
-                                name: 'Rinso Bubuk',
-                                category: 'Kebutuhan Harian',
-                                price: 20700,
-                                stock: 100
-                            },
-                            // Makanan Siap Saji (Oranye)
-                            {
-                                id: 11,
-                                name: 'Indomie Cup',
-                                category: 'Makanan Siap Saji',
-                                price: 8000,
-                                stock: 60
-                            },
-                            // Produk Segar & Beku (Teal)
-                            {
-                                id: 12,
-                                name: 'Daging Sapi Segar',
-                                category: 'Produk Segar & Beku',
-                                price: 120000,
-                                stock: 15
-                            },
-                            // Kebutuhan Ibu & Anak (Pink)
-                            {
-                                id: 13,
-                                name: 'Pampers Baby',
-                                category: 'Kebutuhan Ibu & Anak',
-                                price: 45000,
-                                stock: 25
-                            },
-                            // Makanan Hewan (Amber)
-                            {
-                                id: 14,
-                                name: 'Whiskas',
-                                category: 'Makanan Hewan',
-                                price: 25000,
-                                stock: 30
-                            },
-                            // Mainan (Lime)
-                            {
-                                id: 15,
-                                name: 'Lego Bricks',
-                                category: 'Mainan',
-                                price: 150000,
-                                stock: 10
-                            },
-                            // Kecantikan (Rose)
-                            {
-                                id: 16,
-                                name: 'Lipstik Matte',
-                                category: 'Kecantikan',
-                                price: 35000,
-                                stock: 40
-                            },
-                            // Perawatan Diri (Emerald)
-                            {
-                                id: 17,
-                                name: 'Shampo Sunsilk',
-                                category: 'Perawatan Diri',
-                                price: 12000,
-                                stock: 55
-                            }
-                        ];
+                        console.error('Gagal load produk');
                     }
-                    // Tambahkan warna ke setiap produk
-                    this.products = this.products.map(p => ({
-                        ...p,
-                        ...this.categoryColors[p.category]
-                    }));
-                    this.filteredProducts = [...this.products];
-                },
+                })
+                .catch(err => {
+                    console.error('Error:', err);
+                    products = @json($produk);
+                    renderProdukGrid();
+                });
+        }
 
-                saveProducts() {
-                    let productsToSave = this.products.map(p => ({
-                        id: p.id,
-                        name: p.name,
-                        category: p.category,
-                        price: p.price,
-                        stock: p.stock
-                    }));
-                    localStorage.setItem('products_pos', JSON.stringify(productsToSave));
-                    this.filterProduk();
-                },
+        function renderProdukGrid() {
+            const grid = document.getElementById('produkGrid');
+            const search = document.getElementById('searchProduk')?.value.toLowerCase() || '';
+            const statusFilter = document.getElementById('filterStatus')?.value || 'all';
 
-                openModal() {
-                    this.isEdit = false;
-                    this.modalTitle = 'Tambah Produk';
-                    this.form = {
-                        id: null,
-                        name: '',
-                        category: 'Makanan',
-                        price: 0,
-                        stock: 0
-                    };
-                    this.showModal = true;
-                },
+            let filtered = products.filter(p => {
+                const matchSearch = p.nama_produk && p.nama_produk.toLowerCase().includes(search);
+                const matchStatus = statusFilter === 'all' || p.status === statusFilter;
+                return matchSearch && matchStatus;
+            });
 
-                editProduct(product) {
-                    this.isEdit = true;
-                    this.modalTitle = 'Edit Produk';
-                    this.form = {
-                        ...product
-                    };
-                    this.showModal = true;
-                },
+            if (filtered.length === 0) {
+                grid.innerHTML =
+                    '<div class="col-span-full text-center py-16 text-gray-400"><i class="fas fa-box-open text-6xl mb-3 block"></i><p class="text-lg">Belum ada produk</p><p class="text-sm mt-1">Klik tombol "Tambah Produk" untuk menambahkan</p></div>';
+                updateStats([]);
+                return;
+            }
 
-                saveProduct() {
-                    if (!this.form.name) {
-                        alert('Nama produk harus diisi!');
-                        return;
-                    }
-                    if (this.form.price <= 0) {
-                        alert('Harga harus lebih dari 0!');
-                        return;
-                    }
-                    if (this.form.stock < 0) {
-                        alert('Stok tidak boleh negatif!');
-                        return;
-                    }
+            grid.innerHTML = filtered.map(p => {
+                const totalStok = (p.stok_gudang || 0);
+                const categoryName = p.kategori?.nama_kategori || 'Lainnya';
 
-                    if (this.isEdit) {
-                        let index = this.products.findIndex(p => p.id === this.form.id);
-                        if (index !== -1) {
-                            this.products[index] = {
-                                ...this.form,
-                                ...this.categoryColors[this.form.category]
-                            };
-                        }
-                    } else {
-                        let newId = Math.max(...this.products.map(p => p.id), 0) + 1;
-                        this.products.push({
-                            id: newId,
-                            ...this.form,
-                            ...this.categoryColors[this.form.category]
-                        });
-                    }
-                    this.saveProducts();
-                    this.closeModal();
-                    alert(this.isEdit ? '✅ Produk berhasil diupdate!' : '✅ Produk berhasil ditambahkan!');
-                },
+                // Warna berdasarkan kategori untuk badge di gambar
+                let badgeColor = 'bg-indigo-600';
+                let textColor = 'text-indigo-600';
+                let statusColor = '';
+                let statusText = '';
+                let statusIcon = '';
 
-                confirmDelete(product) {
-                    this.productToDelete = product;
-                    this.showDeleteModal = true;
-                },
-
-                deleteProduct() {
-                    let index = this.products.findIndex(p => p.id === this.productToDelete.id);
-                    if (index !== -1) {
-                        this.products.splice(index, 1);
-                        this.saveProducts();
-                    }
-                    this.showDeleteModal = false;
-                    this.productToDelete = null;
-                    alert('🗑️ Produk berhasil dihapus!');
-                },
-
-                closeModal() {
-                    this.showModal = false;
-                    this.form = {
-                        id: null,
-                        name: '',
-                        category: 'Makanan',
-                        price: 0,
-                        stock: 0
-                    };
+                if (categoryName === 'Makanan') {
+                    badgeColor = 'bg-red-600';
+                    textColor = 'text-red-600';
+                } else if (categoryName === 'Minuman') {
+                    badgeColor = 'bg-blue-600';
+                    textColor = 'text-blue-600';
+                } else if (categoryName === 'Snack') {
+                    badgeColor = 'bg-yellow-600';
+                    textColor = 'text-yellow-600';
+                } else if (categoryName === 'Makanan Siap Saji') {
+                    badgeColor = 'bg-orange-600';
+                    textColor = 'text-orange-600';
+                } else if (categoryName === 'Rokok') {
+                    badgeColor = 'bg-gray-600';
+                    textColor = 'text-gray-600';
+                } else if (categoryName === 'Perawatan Tubuh') {
+                    badgeColor = 'bg-green-600';
+                    textColor = 'text-green-600';
                 }
-            };
+
+                // Status untuk ditampilkan (tanpa kategori)
+                if (p.status === 'pending') {
+                    statusColor = 'text-yellow-600 bg-yellow-50';
+                    statusIcon = 'fa-clock';
+                    statusText = 'Menunggu Approve';
+                } else if (p.status === 'approved') {
+                    statusColor = 'text-green-600 bg-green-50';
+                    statusIcon = 'fa-check-circle';
+                    statusText = 'Disetujui';
+                } else if (p.status === 'rejected') {
+                    statusColor = 'text-red-600 bg-red-50';
+                    statusIcon = 'fa-times-circle';
+                    statusText = 'Ditolak';
+                }
+
+                // Gambar URL
+                let imageUrl = null;
+                if (p.gambar_produk) {
+                    if (p.gambar_produk.startsWith('produk/')) {
+                        imageUrl = `/storage/${p.gambar_produk}`;
+                    } else if (p.gambar_produk.startsWith('/storage/')) {
+                        imageUrl = p.gambar_produk;
+                    } else {
+                        imageUrl = `/storage/produk/${p.gambar_produk}`;
+                    }
+                }
+
+                const isEditable = p.status !== 'approved';
+
+                return `
+    <div class="bg-white rounded-xl shadow-sm overflow-hidden hover:shadow-lg transition-all duration-300 group">
+        <!-- Gambar Full di Atas -->
+        <div class="relative h-48 overflow-hidden bg-gray-200">
+            ${imageUrl ? 
+                `<img src="${imageUrl}" alt="${escapeHtml(p.nama_produk)}" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300" onerror="this.onerror=null; this.parentElement.innerHTML='<div class=\'w-full h-full flex items-center justify-center bg-gradient-to-br from-indigo-100 to-purple-100\'><i class=\'fas fa-box-open text-5xl text-indigo-300\'></i></div>'">` : 
+                `<div class="w-full h-full flex items-center justify-center bg-gradient-to-br from-indigo-100 to-purple-100">
+                                                                                            <i class="fas fa-box-open text-5xl text-indigo-300"></i>
+                                                                                        </div>`
+            }
+            <!-- Category Badge di pojok kanan atas GAMBAR -->
+            <span class="absolute top-3 right-3 text-xs px-3 py-1 rounded-full text-white font-medium shadow-md ${badgeColor} z-10">
+                <i class="fas fa-tag mr-1 text-xs"></i> ${escapeHtml(categoryName)}
+            </span>
+            <div class="absolute bottom-0 left-0 right-0 h-16 bg-gradient-to-t from-black/30 to-transparent"></div>
+        </div>
+        
+        <!-- Info Produk -->
+        <div class="p-4">
+          <!-- Hanya STATUS di sebelah kiri -->
+            <div class="flex justify-start mb-2">
+                <span class="text-xs px-2 py-1 rounded-full ${statusColor}">
+                    <i class="fas ${statusIcon} mr-1 text-xs"></i> ${statusText}
+                </span>
+            </div>
+            
+            <!-- Nama Produk -->
+            <h3 class="font-bold text-lg text-gray-800 mb-1 line-clamp-1">${escapeHtml(p.nama_produk)}</h3>
+            
+            <!-- Harga -->
+            <div class="text-2xl font-bold ${textColor} mb-3">
+                    Rp ${formatPrice(p.harga)} 
+                </div>
+            
+            <!-- Stok dan Aksi -->
+            <div class="flex items-center justify-between pt-3 border-t border-gray-100">
+                <div class="flex items-center gap-2">
+                    <i class="fas fa-warehouse text-gray-400 text-sm"></i>
+                    <span class="text-sm ${totalStok <= 5 ? 'text-red-600 font-bold' : 'text-gray-600'}">
+                        Stok: ${totalStok}
+                    </span>
+                    ${totalStok <= 5 ? '<span class="text-red-500 text-xs animate-pulse">⚠️</span>' : ''}
+                </div>
+                <div class="flex gap-2">
+                    ${isEditable ? `
+                                                                                                <button onclick="editProduct(${p.produk_id})" class="text-blue-600 hover:text-blue-800 transition p-1.5 hover:bg-blue-50 rounded-lg" title="Edit">
+                                                                                                    <i class="fas fa-edit"></i>
+                                                                                                </button>
+                                                                                                <button onclick="showDeleteModal(${p.produk_id}, '${escapeHtml(p.nama_produk)}')" class="text-red-600 hover:text-red-800 transition p-1.5 hover:bg-red-50 rounded-lg" title="Hapus">
+                                                                                                    <i class="fas fa-trash-alt"></i>
+                                                                                                </button>
+                                                                                            ` : `
+                                                                                                <span class="text-gray-400 text-sm" title="Produk sudah disetujui tidak dapat diedit">
+                                                                                                    <i class="fas fa-lock"></i>
+                                                                                                </span>
+                                                                                            `}
+                    ${p.status === 'rejected' && p.alasan_ditolak ? `
+                                                                                                <button onclick="showRejectReason('${escapeHtml(p.alasan_ditolak)}')" class="text-red-500 hover:text-red-700 transition p-1.5" title="Lihat Alasan Ditolak">
+                                                                                                    <i class="fas fa-info-circle"></i>
+                                                                                                </button>
+                                                                                            ` : ''}
+                </div>
+            </div>
+        </div>
+    </div>
+    `;
+            }).join('');
+
+            updateStats(filtered);
+        }
+
+        function updateStats(products) {
+            const totalNilai = products.reduce((sum, p) => sum + (p.harga * (p.stok_gudang || 0)), 0);
+            const lowStock = products.filter(p => (p.stok_gudang || 0) <= 5).length;
+            const pendingCount = products.filter(p => p.status === 'pending').length;
+
+            document.getElementById('totalProduk').innerText = products.length;
+            document.getElementById('totalInventaris').innerText = formatPrice(totalNilai);
+            document.getElementById('lowStockCount').innerText = lowStock;
+            document.getElementById('pendingCount').innerText = pendingCount;
+        }
+
+        function filterProdukTable() {
+            renderProdukGrid();
+        }
+
+        function previewImage(input) {
+            const preview = document.getElementById('previewGambar');
+            const previewImg = document.getElementById('previewImg');
+
+            if (input.files && input.files[0]) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    previewImg.src = e.target.result;
+                    preview.classList.remove('hidden');
+                };
+                reader.readAsDataURL(input.files[0]);
+            }
+        }
+
+        function showRejectReason(alasan) {
+            document.getElementById('rejectReasonText').innerText = alasan;
+            showModal('modalRejectReason');
+        }
+
+        function showTambahProdukModal() {
+            document.getElementById('modalTitle').innerText = 'Tambah Produk';
+            document.getElementById('produkId').value = '';
+            document.getElementById('namaProduk').value = '';
+            document.getElementById('kategoriId').value = '';
+            document.getElementById('harga').value = '';
+            document.getElementById('stokGudang').value = '0';
+            document.getElementById('gambarProduk').value = '';
+            document.getElementById('previewGambar').classList.add('hidden');
+            showModal('modalProduk');
+        }
+
+        function editProduct(id) {
+            const product = products.find(p => p.produk_id === id);
+            if (product) {
+                if (product.status === 'approved') {
+                    showToast('Produk yang sudah disetujui tidak dapat diedit!', 'error');
+                    return;
+                }
+                document.getElementById('modalTitle').innerText = 'Edit Produk';
+                document.getElementById('produkId').value = product.produk_id;
+                document.getElementById('namaProduk').value = product.nama_produk;
+                document.getElementById('kategoriId').value = product.kategori_id;
+                document.getElementById('harga').value = product.harga;
+                document.getElementById('stokGudang').value = product.stok_gudang || 0;
+                document.getElementById('gambarProduk').value = '';
+                document.getElementById('previewGambar').classList.add('hidden');
+                showModal('modalProduk');
+            }
+        }
+
+        function saveProduct(event) {
+            event.preventDefault();
+
+            const id = document.getElementById('produkId').value;
+            const stokGudang = parseInt(document.getElementById('stokGudang').value) || 0;
+
+            // 🔥 VALIDASI STOK MINIMAL 10 UNTUK PRODUK BARU
+            if (!id && stokGudang < 10) {
+                showToast('Stok minimal untuk produk baru adalah 10!', 'error');
+                return;
+            }
+
+            const url = id ? `/gudang/produk/${id}` : '/gudang/produk';
+
+            const formData = new FormData();
+            formData.append('nama_produk', document.getElementById('namaProduk').value);
+            formData.append('kategori_id', document.getElementById('kategoriId').value);
+            formData.append('harga', document.getElementById('harga').value);
+            formData.append('stok_gudang', stokGudang);
+
+            const gambarFile = document.getElementById('gambarProduk').files[0];
+            if (gambarFile) {
+                formData.append('gambar', gambarFile);
+            }
+
+            if (id) {
+                formData.append('_method', 'PUT');
+            }
+
+            fetch(url, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                        'Accept': 'application/json'
+                    },
+                    body: formData
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        showToast(data.message, 'success');
+                        closeModal('modalProduk');
+                        loadProducts();
+                    } else {
+                        showToast(data.message || 'Gagal menyimpan produk', 'error');
+                    }
+                })
+                .catch(err => {
+                    console.error('Error:', err);
+                    showToast('Terjadi kesalahan pada server', 'error');
+                });
+        }
+
+        function showDeleteModal(id, name) {
+            const product = products.find(p => p.produk_id === id);
+            if (product && product.status === 'approved') {
+                showToast('Produk yang sudah disetujui tidak dapat dihapus!', 'error');
+                return;
+            }
+            deleteId = id;
+            document.getElementById('deleteProductName').innerText = name;
+            showModal('modalHapus');
+        }
+
+        function confirmDeleteProduct() {
+            if (!deleteId) return;
+
+            fetch(`/gudang/produk/${deleteId}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json'
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        showToast(data.message, 'success');
+                        closeModal('modalHapus');
+                        deleteId = null;
+                        loadProducts();
+                    } else {
+                        showToast(data.message || 'Gagal menghapus produk', 'error');
+                    }
+                })
+                .catch(err => {
+                    console.error('Error:', err);
+                    showToast('Terjadi kesalahan pada server', 'error');
+                });
+        }
+
+        function showModal(modalId) {
+            document.getElementById(modalId).classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).classList.add('hidden');
+            document.body.style.overflow = 'auto';
+        }
+
+        function formatPrice(price) {
+            const angka = parseFloat(price);
+            if (isNaN(angka)) return '0';
+            return angka.toLocaleString('id-ID', {
+                minimumFractionDigits: 0,
+                maximumFractionDigits: 2
+            });
+        }
+
+        function showToast(message, type = 'success') {
+            const toast = document.getElementById('toast');
+            const toastContent = document.getElementById('toastContent');
+            const toastIcon = document.getElementById('toastIcon');
+            const toastMessage = document.getElementById('toastMessage');
+
+            if (type === 'success') {
+                toastContent.className = 'bg-white rounded-lg shadow-lg p-4 min-w-[300px] border-l-4 border-green-500';
+                toastIcon.innerHTML = '<i class="fas fa-check-circle text-green-500 text-xl"></i>';
+            } else {
+                toastContent.className = 'bg-white rounded-lg shadow-lg p-4 min-w-[300px] border-l-4 border-red-500';
+                toastIcon.innerHTML = '<i class="fas fa-exclamation-circle text-red-500 text-xl"></i>';
+            }
+
+            toastMessage.textContent = message;
+            toast.classList.remove('hidden');
+            setTimeout(() => toast.classList.add('hidden'), 3000);
+        }
+
+        function hideToast() {
+            document.getElementById('toast').classList.add('hidden');
+        }
+
+        function escapeHtml(text) {
+            if (!text) return '';
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
         }
     </script>
+
+    <style>
+        .line-clamp-1 {
+            display: -webkit-box;
+            -webkit-line-clamp: 1;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+    </style>
 @endsection

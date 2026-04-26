@@ -16,20 +16,21 @@ class KategoriSeeder extends Seeder
     public function run(): void
     {
         DB::table('kategoris')->insert([
-        ['nama_kategori' => 'Makanan'],
-        ['nama_kategori' => 'Minuman'],
-        ['nama_kategori' => 'Makanan Ringan'],
-        ['nama_kategori' => 'Makanan Sehat'],
-        ['nama_kategori' => 'Produk Kebersihan'],
-        ['nama_kategori' => 'Kebutuhan Harian'], 
-        ['nama_kategori' => 'Makanan Siap Saji'],
-        ['nama_kategori' => 'Produk Segar & Beku'],
-        ['nama_kategori' => 'Kebutuhan Ibu & Anak'],
-        ['nama_kategori' => 'Makanan Hewan'],
-        ['nama_kategori' => 'Mainan'],
-        ['nama_kategori' => 'Kecantikan'],
-        ['nama_kategori' => 'Perawatan Diri'],
-    ]);
+            ['nama_kategori' => 'Makanan'],
+            ['nama_kategori' => 'Minuman'],
+            ['nama_kategori' => 'Makanan Ringan'],
+            ['nama_kategori' => 'Makanan Sehat'],
+            ['nama_kategori' => 'Produk Kebersihan'],
+            ['nama_kategori' => 'Kebutuhan Harian'],
+            ['nama_kategori' => 'Makanan Siap Saji'],
+            ['nama_kategori' => 'Produk Segar & Beku'],
+            ['nama_kategori' => 'Kebutuhan Ibu & Anak'],
+            ['nama_kategori' => 'Makanan Hewan'],
+            ['nama_kategori' => 'Mainan'],
+            ['nama_kategori' => 'Kecantikan'],
+            ['nama_kategori' => 'Perawatan Diri'],
+            ['nama_kategori' => 'Produk Kesehatan'],
+        ]);
         $this->command->info('KategoriSeeder done');
     }
 }
