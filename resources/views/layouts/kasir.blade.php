@@ -143,10 +143,9 @@
                 </a>
 
                 {{-- Laporan --}}
-                <a href="{{ route('kasir.laporan') }}"
-                    class="sidebar-item flex items-center gap-3 px-4 py-3 rounded-xl text-slate-600 hover:bg-slate-50 transition">
-                    <i class="fas fa-chart-bar w-5 h-5"></i>
-                    <span>Laporan</span>
+                <a href="{{ route('kasir.laporan_penjualan_kasir') }}"
+                    class="sidebar-item flex items-center gap-3 px-4 py-3 rounded-xl transition">
+                    <i class="fas fa-chart-line"></i> Laporan Penjualan
                 </a>
             </nav>
 

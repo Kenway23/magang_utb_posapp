@@ -14,6 +14,7 @@ use App\Http\Controllers\Gudang\StockAdjustmentController;
 use App\Http\Controllers\Owner\OwnerRiwayatController;
 use App\Http\Controllers\Owner\OwnerLaporanController;
 use App\Http\Controllers\Owner\LaporanApprovalController;
+use App\Http\Controllers\Kasir\KasirLaporanController;
 
 // ==================== HALAMAN AWAL ====================
 Route::get('/', function () {
@@ -120,9 +121,8 @@ Route::prefix('kasir')
         Route::get('/riwayat-data', [KasirController::class, 'getRiwayatData'])->name('riwayat_data');  // ← TAMBAHKAN INI
     
         // Laporan
-        Route::get('/laporan', function () {
-            return view('kasir.laporan');
-        })->name('laporan');
+        Route::get('/laporan-penjualan-kasir', [KasirLaporanController::class, 'index'])->name('laporan_penjualan_kasir');
+        Route::get('/laporan-penjualan-kasir/data', [KasirLaporanController::class, 'getData'])->name('laporan_penjualan_kasir.data');
     });
 
 // ==================== ROUTE GUDANG ====================
