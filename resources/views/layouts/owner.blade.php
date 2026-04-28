@@ -174,9 +174,9 @@
                             class="submenu-item flex items-center gap-2 px-4 py-2 rounded-lg text-sm transition-all duration-200 text-slate-600 hover:bg-slate-50">
                             <i class="fas fa-check-double w-4 h-4"></i> Approval Aktivitas Gudang
                         </a>
-                        <a href="{{ route('owner.stok.laporan') }}"
+                        <a href="{{ route('owner.stok.laporan_approval') }}"
                             class="submenu-item flex items-center gap-2 px-4 py-2 rounded-lg text-sm transition-all duration-200 text-slate-600 hover:bg-slate-50">
-                            <i class="fas fa-file-alt w-4 h-4"></i> Laporan
+                            <i class="fas fa-file-alt w-4 h-4"></i> Laporan Approval Gudang
                         </a>
                     </div>
                 </div>

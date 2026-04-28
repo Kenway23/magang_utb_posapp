@@ -12,6 +12,8 @@ use App\Http\Controllers\Owner\ProdukController;
 use App\Http\Controllers\Kasir\KasirController;
 use App\Http\Controllers\Gudang\StockAdjustmentController;
 use App\Http\Controllers\Owner\OwnerRiwayatController;
+use App\Http\Controllers\Owner\OwnerLaporanController;
+use App\Http\Controllers\Owner\LaporanApprovalController;
 
 // ==================== HALAMAN AWAL ====================
 Route::get('/', function () {
@@ -67,6 +69,7 @@ Route::prefix('owner')
             Route::post('/approval/pengiriman/{id}/approve', [OwnerStokController::class, 'approvePengiriman'])->name('approval.pengiriman.approve');
             Route::post('/approval/pengiriman/{id}/reject', [OwnerStokController::class, 'rejectPengiriman'])->name('approval.pengiriman.reject');
 
+            // Approve/Reject PENYESUAIAN STOK
             Route::post('/approval/penyesuaian/{id}/approve', [OwnerStokController::class, 'approvePenyesuaian'])->name('approval.penyesuaian.approve');
             Route::post('/approval/penyesuaian/{id}/reject', [OwnerStokController::class, 'rejectPenyesuaian'])->name('approval.penyesuaian.reject');
 
@@ -79,16 +82,18 @@ Route::prefix('owner')
             Route::get('/pengiriman', [OwnerStokController::class, 'pengiriman'])->name('pengiriman');
             Route::post('/kirim-ke-toko', [OwnerStokController::class, 'kirimKeToko'])->name('kirimKeToko');
 
-            // LAPORAN STOK
-            Route::get('/laporan', [OwnerStokController::class, 'laporan'])->name('laporan');
+            // 🔥 LAPORAN APPROVAL - TAMBAHKAN DI SINI (DI DALAM GRUP STOK)
+            Route::get('/laporan-approval', [LaporanApprovalController::class, 'index'])->name('laporan_approval');
+            Route::get('/laporan-approval/data', [LaporanApprovalController::class, 'getData'])->name('laporan_approval.data');
         });
 
+        // Riwayat Transaksi & Laporan Penjualan (di luar grup stok)
         Route::get('/riwayat-transaksi', [OwnerRiwayatController::class, 'index'])->name('riwayat_transaksi');
         Route::get('/riwayat-transaksi/data', [OwnerRiwayatController::class, 'getData'])->name('riwayat_transaksi.data');
 
-        Route::get('/laporan-penjualan', function () {
-            return view('owner.laporan_penjualan');
-        })->name('laporan_penjualan');
+        Route::get('/laporan-penjualan', [OwnerLaporanController::class, 'index'])->name('laporan_penjualan');
+        Route::get('/laporan-penjualan/data', [OwnerLaporanController::class, 'getData'])->name('laporan_penjualan.data');
+        Route::get('/laporan-penjualan/kasir-list', [OwnerLaporanController::class, 'getKasirList'])->name('laporan_penjualan.kasir_list');
     });
 
 // ==================== ROUTE KASIR ====================
