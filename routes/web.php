@@ -11,6 +11,7 @@ use App\Http\Controllers\Owner\OwnerStokController;
 use App\Http\Controllers\Owner\ProdukController;
 use App\Http\Controllers\Kasir\KasirController;
 use App\Http\Controllers\Gudang\StockAdjustmentController;
+use App\Http\Controllers\Owner\OwnerRiwayatController;
 
 // ==================== HALAMAN AWAL ====================
 Route::get('/', function () {
@@ -66,7 +67,6 @@ Route::prefix('owner')
             Route::post('/approval/pengiriman/{id}/approve', [OwnerStokController::class, 'approvePengiriman'])->name('approval.pengiriman.approve');
             Route::post('/approval/pengiriman/{id}/reject', [OwnerStokController::class, 'rejectPengiriman'])->name('approval.pengiriman.reject');
 
-            // 🔥🔥🔥 APPROVE/REJECT PENYESUAIAN STOK 🔥🔥🔥
             Route::post('/approval/penyesuaian/{id}/approve', [OwnerStokController::class, 'approvePenyesuaian'])->name('approval.penyesuaian.approve');
             Route::post('/approval/penyesuaian/{id}/reject', [OwnerStokController::class, 'rejectPenyesuaian'])->name('approval.penyesuaian.reject');
 
@@ -83,10 +83,8 @@ Route::prefix('owner')
             Route::get('/laporan', [OwnerStokController::class, 'laporan'])->name('laporan');
         });
 
-        // Riwayat & Laporan
-        Route::get('/riwayat-transaksi', function () {
-            return view('owner.riwayat_transaksi');
-        })->name('riwayat_transaksi');
+        Route::get('/riwayat-transaksi', [OwnerRiwayatController::class, 'index'])->name('riwayat_transaksi');
+        Route::get('/riwayat-transaksi/data', [OwnerRiwayatController::class, 'getData'])->name('riwayat_transaksi.data');
 
         Route::get('/laporan-penjualan', function () {
             return view('owner.laporan_penjualan');
