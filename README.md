@@ -50,7 +50,6 @@ Mengatur akses pengguna berdasarkan peran masing-masing dalam sistem.
 | Backend | PHP — Laravel Framework |
 | Frontend | Blade Template Engine |
 | Database | MySQL |
-| Build Tool | Vite |
 
 ## Cara Instalasi
 
