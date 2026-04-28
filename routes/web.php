@@ -6,9 +6,11 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\Gudang\GudangProdukController;
 use App\Http\Controllers\Gudang\TambahStockController;
 use App\Http\Controllers\Gudang\PengirimanController;
+use App\Http\Controllers\Gudang\ApprovalRequestKasirController;
 use App\Http\Controllers\Owner\OwnerStokController;
 use App\Http\Controllers\Owner\ProdukController;
 use App\Http\Controllers\Kasir\KasirController;
+use App\Http\Controllers\Gudang\StockAdjustmentController;
 
 // ==================== HALAMAN AWAL ====================
 Route::get('/', function () {
@@ -60,9 +62,13 @@ Route::prefix('owner')
             Route::post('/approval/tambah-stok/{id}/approve', [OwnerStokController::class, 'approveTambahStok'])->name('approval.tambah_stok.approve');
             Route::post('/approval/tambah-stok/{id}/reject', [OwnerStokController::class, 'rejectTambahStok'])->name('approval.tambah_stok.reject');
 
-            // 🔥 Approve/Reject PENGIRIMAN (Gudang → Toko)
+            // Approve/Reject PENGIRIMAN (Gudang → Toko)
             Route::post('/approval/pengiriman/{id}/approve', [OwnerStokController::class, 'approvePengiriman'])->name('approval.pengiriman.approve');
             Route::post('/approval/pengiriman/{id}/reject', [OwnerStokController::class, 'rejectPengiriman'])->name('approval.pengiriman.reject');
+
+            // 🔥🔥🔥 APPROVE/REJECT PENYESUAIAN STOK 🔥🔥🔥
+            Route::post('/approval/penyesuaian/{id}/approve', [OwnerStokController::class, 'approvePenyesuaian'])->name('approval.penyesuaian.approve');
+            Route::post('/approval/penyesuaian/{id}/reject', [OwnerStokController::class, 'rejectPenyesuaian'])->name('approval.penyesuaian.reject');
 
             // PENERIMAAN STOK
             Route::get('/penerimaan', [OwnerStokController::class, 'penerimaan'])->name('penerimaan');
@@ -102,9 +108,14 @@ Route::prefix('kasir')
         Route::get('/categories', [KasirController::class, 'getCategories'])->name('categories');
         Route::post('/transaction', [KasirController::class, 'storeTransaction'])->name('transaction.store');
 
+        Route::get('/request-kirim-stok', [KasirController::class, 'requestKirimStok'])->name('request_kirim_stok');
+        Route::post('/request-kirim-stok', [KasirController::class, 'storeRequestKirimStok'])->name('request_kirim_stok.store');
+        Route::put('/request-kirim-stok/{id}', [KasirController::class, 'updateRequestKirimStok'])->name('request_kirim_stok.update');
+        Route::delete('/request-kirim-stok/{id}', [KasirController::class, 'destroyRequestKirimStok'])->name('request_kirim_stok.destroy');
         // Riwayat Transaksi
         Route::get('/riwayat-transaksi', [KasirController::class, 'riwayat'])->name('riwayat_transaksi');
-
+        Route::get('/riwayat-data', [KasirController::class, 'getRiwayatData'])->name('riwayat_data');  // ← TAMBAHKAN INI
+    
         // Laporan
         Route::get('/laporan', function () {
             return view('kasir.laporan');
@@ -132,14 +143,12 @@ Route::prefix('gudang')
             return view('gudang.d_gudang', compact('produks', 'totalProduk', 'totalStok', 'produkMenipis', 'produkPending'));
         })->name('dashboard');
 
-        // Manajemen Produk (CRUD)
         Route::get('/produk', [GudangProdukController::class, 'index'])->name('produk.index');
         Route::get('/produk/data', [GudangProdukController::class, 'getData'])->name('produk.data');
         Route::post('/produk', [GudangProdukController::class, 'store'])->name('produk.store');
         Route::put('/produk/{id}', [GudangProdukController::class, 'update'])->name('produk.update');
         Route::delete('/produk/{id}', [GudangProdukController::class, 'destroy'])->name('produk.destroy');
 
-        // 🔥 REQUEST TAMBAH STOK
         Route::prefix('tambah-stok')->name('tambah_stok.')->group(function () {
             Route::get('/', [TambahStockController::class, 'index'])->name('index');
             Route::post('/', [TambahStockController::class, 'store'])->name('store');
@@ -147,7 +156,6 @@ Route::prefix('gudang')
             Route::delete('/{id}', [TambahStockController::class, 'destroy'])->name('destroy');
         });
 
-        // 🔥 REQUEST PENGIRIMAN STOK (Gudang → Toko)
         Route::prefix('pengiriman')->name('pengiriman.')->group(function () {
             Route::get('/', [PengirimanController::class, 'index'])->name('index');
             Route::post('/', [PengirimanController::class, 'store'])->name('store');
@@ -155,11 +163,29 @@ Route::prefix('gudang')
             Route::delete('/{id}', [PengirimanController::class, 'destroy'])->name('destroy');
         });
 
-        // Manajemen Stok Lainnya
+        Route::prefix('penyesuaian-stok')->name('penyesuaian_stok.')->group(function () {
+            Route::get('/', [StockAdjustmentController::class, 'index'])->name('index');
+            Route::post('/', [StockAdjustmentController::class, 'store'])->name('store');
+            Route::put('/{id}', [StockAdjustmentController::class, 'update'])->name('update');
+            Route::post('/{id}/submit', [StockAdjustmentController::class, 'submit'])->name('submit');
+            Route::post('/{id}/approve', [StockAdjustmentController::class, 'approve'])->name('approve');
+            Route::post('/{id}/reject', [StockAdjustmentController::class, 'reject'])->name('reject');
+            Route::delete('/{id}', [StockAdjustmentController::class, 'destroy'])->name('destroy');
+            Route::get('/{id}/detail', [StockAdjustmentController::class, 'getDetail'])->name('detail');
+        });
+
+        // 🔥 PERBAIKAN: Tambahkan route /data di sini
+        Route::prefix('approval-request-kasir')->name('approval_request_kasir.')->group(function () {
+            Route::get('/', [ApprovalRequestKasirController::class, 'index'])->name('index');
+            Route::get('/data', [ApprovalRequestKasirController::class, 'getData'])->name('data');  // 🔥 TAMBAHKAN INI
+            Route::get('/{id}/detail', [ApprovalRequestKasirController::class, 'detail'])->name('detail');
+            Route::post('/{id}/approve', [ApprovalRequestKasirController::class, 'approve'])->name('approve');
+            Route::post('/{id}/reject', [ApprovalRequestKasirController::class, 'reject'])->name('reject');
+        });
+
+        // ==================== MANAJEMEN STOK ====================
         Route::prefix('stok')->name('stok.')->group(function () {
-            Route::get('/penyesuaian', function () {
-                return view('gudang.stok.penyesuaian');
-            })->name('penyesuaian');
+            Route::get('/penyesuaian', [StockAdjustmentController::class, 'index'])->name('penyesuaian');
             Route::get('/laporan', function () {
                 return view('gudang.laporan');
             })->name('laporan');

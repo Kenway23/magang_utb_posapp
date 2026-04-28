@@ -253,6 +253,21 @@
                     </div>
                 </div>
 
+                <a href="{{ route('gudang.approval_request_kasir.index') }}"
+                    class="sidebar-item flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 {{ request()->routeIs('gudang.approval_request_kasir.*') ? 'sidebar-item-active' : 'text-slate-600 hover:bg-slate-50' }}">
+                    <i class="fas fa-clipboard-list w-5 h-5"></i>
+                    <span>Approval Request Stok</span>
+                    @php
+                        $pendingCount = \App\Models\Pengiriman::where('status', 'pending')
+                            ->where('tujuan_toko', 'Request Kasir')
+                            ->count();
+                    @endphp
+                    @if ($pendingCount > 0)
+                        <span
+                            class="ml-auto bg-red-500 text-white text-xs rounded-full px-2 py-0.5">{{ $pendingCount }}</span>
+                    @endif
+                </a>
+
                 <a href="{{ route('gudang.riwayat_gudang') }}"
                     class="sidebar-item flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 {{ request()->routeIs('gudang.riwayat') ? 'sidebar-item-active' : 'text-slate-600' }}">
                     <i class="fas fa-history w-5 h-5"></i> Riwayat Pergerakan Gudang

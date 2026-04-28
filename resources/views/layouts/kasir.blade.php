@@ -126,7 +126,13 @@
                 <a href="{{ route('kasir.dashboard') }}"
                     class="sidebar-item flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 {{ request()->routeIs('kasir.dashboard') ? 'sidebar-item-active' : 'text-slate-600 hover:bg-slate-50' }}">
                     <i class="fas fa-chart-line w-5 h-5"></i>
-                    <span>Dashboard & POS</span>
+                    <span>Transaksi</span>
+                </a>
+
+                <a href="{{ route('kasir.request_kirim_stok') }}"
+                    class="sidebar-item flex items-center gap-3 px-4 py-3 rounded-xl">
+                    <i class="fas fa-truck w-5 h-5"></i>
+                    <span>Request Stok</span>
                 </a>
 
                 {{-- Riwayat Transaksi --}}

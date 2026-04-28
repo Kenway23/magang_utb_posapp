@@ -19,16 +19,35 @@ class PengirimanController extends Controller
             ->orderBy('nama_produk')
             ->get();
 
-        $pengiriman = Pengiriman::with(['produk', 'requester', 'approver'])
+        // 🔥 REQUEST DARI GUDANG (yang dibuat oleh gudang sendiri)
+        $pengirimanDariGudang = Pengiriman::with(['produk', 'requester', 'approver'])
             ->where('requested_by', Auth::id())
             ->orderBy('created_at', 'desc')
             ->get();
 
-        // 🔥 View berada di gudang/stok/pengiriman
-        return view('gudang.stok.pengiriman', compact('produk', 'pengiriman'));
+        // 🔥 REQUEST DARI KASIR (yang dibuat oleh kasir, requested_by bukan ID gudang)
+        $pengirimanDariKasir = Pengiriman::with(['produk', 'requester', 'approver'])
+            ->whereNotNull('requested_by')
+            ->where('requested_by', '!=', Auth::id())
+            ->orderBy('created_at', 'desc')
+            ->get();
+
+        // 🔥 HITUNG REQUEST DARI KASIR YANG MASIH PENDING
+        $pendingKasirRequests = Pengiriman::whereNotNull('requested_by')
+            ->where('requested_by', '!=', Auth::id())
+            ->where('status', 'pending')
+            ->count();
+
+        // View berada di gudang/stok/pengiriman
+        return view('gudang.stok.pengiriman', compact(
+            'produk',
+            'pengirimanDariGudang',
+            'pengirimanDariKasir',
+            'pendingKasirRequests'
+        ));
     }
 
-    // Simpan request pengiriman
+    // Simpan request pengiriman (dari gudang)
     public function store(Request $request)
     {
         try {
@@ -79,7 +98,7 @@ class PengirimanController extends Controller
         }
     }
 
-    // Update request pengiriman
+    // Update request pengiriman (dari gudang)
     public function update(Request $request, $id)
     {
         try {
@@ -90,6 +109,14 @@ class PengirimanController extends Controller
                 return response()->json([
                     'success' => false,
                     'message' => 'Request sudah disetujui, tidak dapat diedit'
+                ], 403);
+            }
+
+            // Cek apakah request dari kasir (tidak boleh diedit)
+            if ($pengiriman->requested_by !== Auth::id()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Request dari kasir tidak dapat diedit'
                 ], 403);
             }
 
@@ -149,6 +176,14 @@ class PengirimanController extends Controller
                 ], 403);
             }
 
+            // Request dari kasir tidak bisa dihapus oleh gudang
+            if ($pengiriman->requested_by !== Auth::id()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Request dari kasir tidak dapat dihapus'
+                ], 403);
+            }
+
             $pengiriman->delete();
 
             return response()->json([
@@ -160,6 +195,132 @@ class PengirimanController extends Controller
                 'success' => false,
                 'message' => 'Gagal hapus request: ' . $e->getMessage()
             ], 500);
+        }
+    }
+
+    // Halaman approval request dari kasir untuk gudang
+    public function approvalRequest()
+    {
+        // Request dari kasir yang statusnya pending (belum diproses gudang)
+        $requests = Pengiriman::with(['produk', 'requester', 'approver'])
+            ->whereNotNull('requested_by')
+            ->where('requested_by', '!=', Auth::id())
+            ->where('status', 'pending')
+            ->orderBy('created_at', 'desc')
+            ->get();
+
+        $statistik = [
+            'menunggu' => $requests->where('status', 'pending')->count(),
+            'waiting_owner' => Pengiriman::whereNotNull('requested_by')
+                ->where('requested_by', '!=', Auth::id())
+                ->where('status', 'waiting_owner')
+                ->count(),
+            'approved' => Pengiriman::whereNotNull('requested_by')
+                ->where('requested_by', '!=', Auth::id())
+                ->where('status', 'approved')
+                ->count(),
+            'rejected' => Pengiriman::whereNotNull('requested_by')
+                ->where('requested_by', '!=', Auth::id())
+                ->where('status', 'rejected')
+                ->count(),
+        ];
+
+        return view('gudang.approval_request_kasir', compact('requests', 'statistik'));
+    }
+
+    // Gudang menyetujui request kasir (akan dilanjutkan ke Owner)
+    public function approveRequestKasir($id)
+    {
+        try {
+            $pengiriman = Pengiriman::findOrFail($id);
+
+            if ($pengiriman->status !== 'pending') {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Request sudah diproses sebelumnya'
+                ]);
+            }
+
+            // Cek stok gudang
+            $produk = Produk::findOrFail($pengiriman->produk_id);
+            if ($produk->stok_gudang < $pengiriman->jumlah) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Stok gudang tidak mencukupi! Stok tersedia: ' . $produk->stok_gudang
+                ], 400);
+            }
+
+            // Update status - sekarang menunggu approve Owner
+            $pengiriman->update([
+                'status' => 'waiting_owner',
+                'approved_by' => Auth::id(),
+                'approved_at' => now(),
+                'stok_gudang_sesudah' => $produk->stok_gudang - $pengiriman->jumlah,
+                'stok_toko_sesudah' => $produk->stok_toko + $pengiriman->jumlah
+            ]);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Request disetujui! Menunggu persetujuan Owner.'
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Gagal approve: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    // Gudang menolak request kasir
+    public function rejectRequestKasir(Request $request, $id)
+    {
+        try {
+            $pengiriman = Pengiriman::findOrFail($id);
+
+            if ($pengiriman->status !== 'pending') {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Request sudah diproses sebelumnya'
+                ]);
+            }
+
+            $alasan = $request->alasan ?? 'Tidak ada alasan';
+
+            $pengiriman->update([
+                'status' => 'rejected',
+                'approved_by' => Auth::id(),
+                'approved_at' => now(),
+                'alasan_ditolak' => $alasan
+            ]);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Request ditolak'
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Gagal reject: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    // Get detail request untuk modal (API)
+    public function getDetail($id)
+    {
+        try {
+            $pengiriman = Pengiriman::with(['produk', 'requester', 'approver'])
+                ->findOrFail($id);
+
+            return response()->json([
+                'success' => true,
+                'data' => $pengiriman
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Data tidak ditemukan'
+            ], 404);
         }
     }
 }
