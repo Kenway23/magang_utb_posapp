@@ -36,7 +36,7 @@ class OwnerStokController extends Controller
                         'harga' => number_format($item->harga, 0, ',', '.'),
                         'stok' => $item->stok_gudang,
                         'diajukan_oleh' => $item->creator->name ?? 'Gudang',
-                        'tanggal' => $item->created_at->format('d/m/Y H:i'),
+                        'tanggal' => $item->created_at->toISOString(),
                         'status' => $item->status,
                         'alasan_ditolak' => $item->alasan_ditolak
                     ];

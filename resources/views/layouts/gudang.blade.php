@@ -246,9 +246,9 @@
                         </a>
 
                         {{-- LAPORAN STOK --}}
-                        <a href="{{ route('gudang.stok.laporan') }}"
-                            class="submenu-item flex items-center gap-2 px-4 py-2 rounded-lg text-sm transition-all duration-200 {{ request()->routeIs('gudang.stok.laporan') ? 'submenu-active' : 'text-slate-600' }}">
-                            <i class="fas fa-file-alt w-4 h-4"></i> Laporan Stok
+                        <a href="{{ route('gudang.stok.laporan_gudang') }}"
+                            class="submenu-item flex items-center gap-2 px-4 py-2 rounded-lg text-sm transition-all duration-200 {{ request()->routeIs('gudang.stok.laporan_gudang') ? 'submenu-active' : 'text-slate-600' }}">
+                            <i class="fas fa-file-alt w-4 h-4"></i> Laporan Gudang
                         </a>
                     </div>
                 </div>

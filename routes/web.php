@@ -15,7 +15,9 @@ use App\Http\Controllers\Owner\OwnerRiwayatController;
 use App\Http\Controllers\Owner\OwnerLaporanController;
 use App\Http\Controllers\Owner\LaporanApprovalController;
 use App\Http\Controllers\Kasir\KasirLaporanController;
-
+use App\Http\Controllers\Gudang\LaporanGudangController;
+use App\Http\Controllers\Gudang\RiwayatGudangController;
+use App\Http\Controllers\Owner\OwnerDashboardController;
 // ==================== HALAMAN AWAL ====================
 Route::get('/', function () {
     return view('splash');
@@ -34,9 +36,7 @@ Route::prefix('owner')
     ->group(function () {
 
         // Dashboard
-        Route::get('/dashboard', function () {
-            return view('owner.d_owner');
-        })->name('dashboard');
+        Route::get('/dashboard', [OwnerDashboardController::class, 'index'])->name('dashboard');
 
         // Manajemen Pengguna
         Route::resource('pengguna', UserController::class)->names([
@@ -143,7 +143,40 @@ Route::prefix('gudang')
             $produkMenipis = $produks->where('stok_gudang', '<', 10)->count();
             $produkPending = \App\Models\Produk::where('status', 'pending')->count();
 
-            return view('gudang.d_gudang', compact('produks', 'totalProduk', 'totalStok', 'produkMenipis', 'produkPending'));
+            $latestTambahStok = \App\Models\TambahStock::with('produk')
+                ->where('requested_by', Auth::id())
+                ->orderBy('created_at', 'desc')
+                ->limit(5)
+                ->get();
+
+            $latestPengiriman = \App\Models\Pengiriman::with('produk')
+                ->where('requested_by', Auth::id())
+                ->orderBy('created_at', 'desc')
+                ->limit(5)
+                ->get();
+
+            $latestKasirRequests = \App\Models\Pengiriman::with(['produk', 'requester'])
+                ->where('tujuan_toko', 'Permintaan Kasir')
+                ->where('status', 'pending')
+                ->orderBy('created_at', 'desc')
+                ->limit(5)
+                ->get();
+
+            $pendingKasirRequests = \App\Models\Pengiriman::where('tujuan_toko', 'Permintaan Kasir')
+                ->where('status', 'pending')
+                ->count();
+
+            return view('gudang.d_gudang', compact(
+                'produks',
+                'totalProduk',
+                'totalStok',
+                'produkMenipis',
+                'produkPending',
+                'latestTambahStok',
+                'latestPengiriman',
+                'latestKasirRequests',
+                'pendingKasirRequests'
+            ));
         })->name('dashboard');
 
         Route::get('/produk', [GudangProdukController::class, 'index'])->name('produk.index');
@@ -189,13 +222,11 @@ Route::prefix('gudang')
         // ==================== MANAJEMEN STOK ====================
         Route::prefix('stok')->name('stok.')->group(function () {
             Route::get('/penyesuaian', [StockAdjustmentController::class, 'index'])->name('penyesuaian');
-            Route::get('/laporan', function () {
-                return view('gudang.laporan');
-            })->name('laporan');
+            Route::get('/laporan-gudang', [LaporanGudangController::class, 'index'])->name('laporan_gudang');
+            Route::get('/laporan-gudang/data', [LaporanGudangController::class, 'getData'])->name('laporan_gudang.data');
         });
 
         // Riwayat Gudang
-        Route::get('/riwayat', function () {
-            return view('gudang.riwayat_gudang');
-        })->name('riwayat_gudang');
+        Route::get('/riwayat', [RiwayatGudangController::class, 'index'])->name('riwayat_gudang');
+        Route::get('/riwayat/data', [RiwayatGudangController::class, 'getData'])->name('riwayat_gudang.data');
     });

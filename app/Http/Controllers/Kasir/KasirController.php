@@ -70,12 +70,22 @@ class KasirController extends Controller
                 ->orderBy('nama_produk')
                 ->get()
                 ->map(function ($item) {
+                    // 🔥 TAMBAHKAN URL GAMBAR 🔥
+                    $imageUrl = null;
+                    if ($item->gambar_produk) {
+                        // Jika gambar disimpan di storage/public
+                        $imageUrl = asset('storage/' . $item->gambar_produk);
+                        // Atau jika disimpan langsung di folder public/images
+                        // $imageUrl = asset('images/produk/' . $item->gambar_produk);
+                    }
+
                     return [
                         'id' => $item->produk_id,
                         'name' => $item->nama_produk,
                         'category' => $item->kategori->nama_kategori ?? 'Lainnya',
                         'price' => (float) $item->harga,
                         'stock' => $item->stok_toko,
+                        'image' => $imageUrl,  // 🔥 TAMBAHKAN INI
                         'bgColor' => $this->getCategoryColor($item->kategori->nama_kategori ?? 'Lainnya', 'bg'),
                         'borderColor' => $this->getCategoryColor($item->kategori->nama_kategori ?? 'Lainnya', 'border'),
                         'badgeColor' => $this->getCategoryColor($item->kategori->nama_kategori ?? 'Lainnya', 'badge'),
@@ -89,7 +99,6 @@ class KasirController extends Controller
             return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
         }
     }
-
     // API: Get Categories
     public function getCategories()
     {

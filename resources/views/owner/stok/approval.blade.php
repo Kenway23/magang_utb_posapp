@@ -2,7 +2,8 @@
 
 @section('title', 'Persetujuan Aktivitas Gudang - PROShop')
 @section('header-title', 'Persetujuan Aktivitas Gudang')
-@section('header-subtitle', 'Setujui atau tolak pengajuan (Produk Baru, Tambah Stok, Pengiriman Stok, Penyesuaian
+@section('header-subtitle',
+    'Setujui atau tolak pengajuan (Produk Baru, Tambah Stok, Pengiriman Stok, Penyesuaian
     Stok)')
 
 @section('content')
@@ -208,24 +209,23 @@
 
         <!-- TABEL PRODUK BARU -->
         <div id="tableProduk" class="bg-white rounded-xl shadow-sm overflow-hidden border border-slate-200 mb-6">
-            <div class="px-5 py-3.5 border-b border-slate-200 bg-slate-50/50">
-                <h3 class="font-semibold text-slate-800"><i class="fas fa-box text-indigo-500 mr-2"></i> Daftar Pengajuan
-                    Produk Baru</h3>
+            <div class="px-4 py-2 border-b border-slate-200 bg-slate-50/50">
+                <h3 class="font-semibold text-slate-800 text-sm"><i class="fas fa-box text-indigo-500 mr-2"></i> Daftar
+                    Pengajuan Produk Baru</h3>
             </div>
-            <div class="table-container overflow-x-auto">
-                <table class="w-full text-sm">
+            <div class="overflow-x-auto">
+                <table class="w-full text-xs">
                     <thead class="bg-slate-50">
                         <tr>
-                            <th class="px-5 py-3 text-left text-xs font-semibold text-slate-500 uppercase">Tgl Pengajuan
-                            </th>
-                            <th class="px-5 py-3 text-left text-xs font-semibold text-slate-500 uppercase">Produk</th>
-                            <th class="px-5 py-3 text-left text-xs font-semibold text-slate-500 uppercase">Kategori</th>
-                            <th class="px-5 py-3 text-left text-xs font-semibold text-slate-500 uppercase">Harga</th>
-                            <th class="px-5 py-3 text-left text-xs font-semibold text-slate-500 uppercase">Stok</th>
-                            <th class="px-5 py-3 text-left text-xs font-semibold text-slate-500 uppercase">Diajukan Oleh
-                            </th>
-                            <th class="px-5 py-3 text-left text-xs font-semibold text-slate-500 uppercase">Status</th>
-                            <th class="px-5 py-3 text-center text-xs font-semibold text-slate-500 uppercase">Aksi</th>
+                            <th class="px-3 py-2 text-left font-semibold text-slate-500 w-10">No</th>
+                            <th class="px-3 py-2 text-left font-semibold text-slate-500">Tgl</th>
+                            <th class="px-3 py-2 text-left font-semibold text-slate-500">Produk</th>
+                            <th class="px-3 py-2 text-left font-semibold text-slate-500 w-24">Kategori</th>
+                            <th class="px-3 py-2 text-right font-semibold text-slate-500 w-28">Harga</th>
+                            <th class="px-3 py-2 text-center font-semibold text-slate-500 w-16">Stok</th>
+                            <th class="px-3 py-2 text-left font-semibold text-slate-500 w-24">Pengaju</th>
+                            <th class="px-3 py-2 text-center font-semibold text-slate-500 w-24">Status</th>
+                            <th class="px-3 py-2 text-center font-semibold text-slate-500 w-28">Aksi</th>
                         </tr>
                     </thead>
                     <tbody id="tbodyProduk" class="divide-y divide-slate-100"></tbody>
@@ -471,7 +471,7 @@
             document.getElementById('totalSemua').innerText = semua.length;
             document.getElementById('badgeProduk').innerText = produkData.filter(p => p.status === 'pending').length;
             document.getElementById('badgeTambahStok').innerText = tambahStokData.filter(p => p.status === 'pending')
-            .length;
+                .length;
             document.getElementById('badgePengiriman').innerText = pengirimanData.filter(p => p.status === 'pending' || p
                 .status === 'waiting_owner').length;
             document.getElementById('badgePenyesuaian').innerText = penyesuaianData.filter(p => p.status === 'pending')
@@ -535,40 +535,72 @@
 
         function getStatusBadge(status) {
             if (status === 'pending')
-            return '<span class="status-badge status-pending"><i class="fas fa-clock text-xs"></i> Menunggu</span>';
+                return '<span class="status-badge status-pending"><i class="fas fa-clock text-xs"></i> Menunggu</span>';
             if (status === 'waiting_owner')
-            return '<span class="status-badge" style="background:#e0e7ff;color:#4f46e5;"><i class="fas fa-hourglass-half text-xs"></i> Menunggu Owner</span>';
+                return '<span class="status-badge" style="background:#e0e7ff;color:#4f46e5;"><i class="fas fa-hourglass-half text-xs"></i> Menunggu Owner</span>';
             if (status === 'approved')
-            return '<span class="status-badge status-approved"><i class="fas fa-check-circle text-xs"></i> Disetujui</span>';
+                return '<span class="status-badge status-approved"><i class="fas fa-check-circle text-xs"></i> Disetujui</span>';
             if (status === 'rejected')
-            return '<span class="status-badge status-rejected"><i class="fas fa-times-circle text-xs"></i> Ditolak</span>';
+                return '<span class="status-badge status-rejected"><i class="fas fa-times-circle text-xs"></i> Ditolak</span>';
             return '';
         }
 
         function renderTabelProduk() {
             let tbody = document.getElementById('tbodyProduk');
             let filtered = getFilteredData(produkData);
+
             if (!filtered.length) {
-                tbody.innerHTML = '<td><td colspan="8" class="text-center py-8 text-slate-400">Tidak ada数据</td></tr>';
+                tbody.innerHTML =
+                    `<tr><td colspan="9" class="text-center py-8 text-slate-400 text-sm">Tidak ada data</td></tr>`;
                 return;
             }
+
             tbody.innerHTML = filtered.map(p => `
-                <tr class="hover:bg-slate-50">
-                    <td class="px-5 py-3">${new Date(p.tanggal).toLocaleDateString('id-ID')}</td>
-                    <td class="px-5 py-3 font-medium">${p.nama}</td>
-                    <td class="px-5 py-3"><span class="px-2 py-0.5 text-xs rounded-full bg-indigo-100 text-indigo-700">${p.kategori}</span></td>
-                    <td class="px-5 py-3 font-semibold text-emerald-600">Rp ${p.harga}</td>
-                    <td class="px-5 py-3">${p.stok} pcs</td><td class="px-5 py-3">${p.diajukan_oleh}</td>
-                    <td class="px-5 py-3">${getStatusBadge(p.status)}</td>
-                    <td class="px-5 py-3 text-center">${p.status === 'pending' ? `<div class="flex gap-2 justify-center"><button onclick="showApproveModal('produk',${p.id},'${p.nama.replace(/'/g,"\\'")}')" class="bg-emerald-500 hover:bg-emerald-600 text-white px-3 py-1.5 rounded-lg text-xs">Setuju</button><button onclick="showRejectModal('produk',${p.id},'${p.nama.replace(/'/g,"\\'")}')" class="bg-rose-500 hover:bg-rose-600 text-white px-3 py-1.5 rounded-lg text-xs">Tolak</button></div>` : '<span class="text-slate-400">-</span>'}</td>
-                </tr>`).join('');
+        <tr class="hover:bg-slate-50">
+            <td class="px-3 py-2 text-center text-slate-500">${filtered.indexOf(p) + 1}</td>
+            <td class="px-3 py-2 text-slate-600 whitespace-nowrap text-[11px]">${formatTanggalPendek(p.tanggal)}</td>
+            <td class="px-3 py-2 font-medium text-slate-700 text-sm">${p.nama.length > 25 ? p.nama.substring(0,25)+'...' : p.nama}</td>
+            <td class="px-3 py-2"><span class="px-2 py-0.5 text-[10px] rounded-full bg-indigo-100 text-indigo-700">${p.kategori}</span></td>
+            <td class="px-3 py-2 text-right font-semibold text-emerald-600 text-sm">Rp ${p.harga}</td>
+            <td class="px-3 py-2 text-center">${p.stok}</td>
+            <td class="px-3 py-2 text-slate-600 text-[11px]">${p.diajukan_oleh.length > 15 ? p.diajukan_oleh.substring(0,15)+'...' : p.diajukan_oleh}</td>
+            <td class="px-3 py-2 text-center">${getStatusBadge(p.status)}</td>
+            <td class="px-3 py-2 text-center">
+                ${p.status === 'pending' ? `
+                                <div class="flex gap-1 justify-center">
+                                    <button onclick="showApproveModal('produk',${p.id},'${p.nama.replace(/'/g,"\\'")}')" class="bg-emerald-500 hover:bg-emerald-600 text-white px-2 py-1 rounded text-[10px] font-medium">
+                                        <i class="fas fa-check text-[9px]"></i>
+                                    </button>
+                                    <button onclick="showRejectModal('produk',${p.id},'${p.nama.replace(/'/g,"\\'")}')" class="bg-rose-500 hover:bg-rose-600 text-white px-2 py-1 rounded text-[10px] font-medium">
+                                        <i class="fas fa-times text-[9px]"></i>
+                                    </button>
+                                </div>
+                            ` : '<span class="text-slate-400 text-xs">-</span>'}
+            </td>
+        </tr>
+    `).join('');
+        }
+
+        function formatTanggalPendek(dateString) {
+            if (!dateString) return '-';
+            try {
+                let date = new Date(dateString);
+                if (isNaN(date.getTime())) return dateString;
+                return date.toLocaleDateString('id-ID', {
+                    day: '2-digit',
+                    month: '2-digit',
+                    year: 'numeric'
+                });
+            } catch (e) {
+                return dateString;
+            }
         }
 
         function renderTabelTambahStok() {
             let tbody = document.getElementById('tbodyTambahStok');
             let filtered = getFilteredData(tambahStokData);
             if (!filtered.length) {
-                tbody.innerHTML = '<tr><td colspan="9" class="text-center py-8 text-slate-400">Tidak ada数据</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="9" class="text-center py-8 text-slate-400">Tidak ada data</td></tr>';
                 return;
             }
             tbody.innerHTML = filtered.map(item => `
@@ -611,13 +643,13 @@
                         <td class="px-3 py-3 text-center">
                             ${(item.status === 'pending' || item.status === 'waiting_owner') ? 
                                 `<div class="flex gap-2 justify-center">
-                                        <button ${approveDisabled ? 'disabled' : `onclick="showApproveModal('pengiriman',${item.id},'${item.produk_nama.replace(/'/g,"\\'")}')"`} class="${approveDisabled ? 'bg-gray-300 cursor-not-allowed btn-disabled' : 'bg-emerald-500 hover:bg-emerald-600'} text-white px-3 py-1.5 rounded-lg text-xs">
-                                            <i class="fas fa-check text-xs mr-1"></i> Setuju
-                                        </button>
-                                        <button onclick="showRejectModal('pengiriman',${item.id},'${item.produk_nama.replace(/'/g,"\\'")}')" class="bg-rose-500 hover:bg-rose-600 text-white px-3 py-1.5 rounded-lg text-xs">
-                                            <i class="fas fa-times text-xs mr-1"></i> Tolak
-                                        </button>
-                                    </div>` : '<span class="text-slate-400 text-xs">-</span>'
+                                                        <button ${approveDisabled ? 'disabled' : `onclick="showApproveModal('pengiriman',${item.id},'${item.produk_nama.replace(/'/g,"\\'")}')"`} class="${approveDisabled ? 'bg-gray-300 cursor-not-allowed btn-disabled' : 'bg-emerald-500 hover:bg-emerald-600'} text-white px-3 py-1.5 rounded-lg text-xs">
+                                                            <i class="fas fa-check text-xs mr-1"></i> Setuju
+                                                        </button>
+                                                        <button onclick="showRejectModal('pengiriman',${item.id},'${item.produk_nama.replace(/'/g,"\\'")}')" class="bg-rose-500 hover:bg-rose-600 text-white px-3 py-1.5 rounded-lg text-xs">
+                                                            <i class="fas fa-times text-xs mr-1"></i> Tolak
+                                                        </button>
+                                                    </div>` : '<span class="text-slate-400 text-xs">-</span>'
                             }
                         </td>
                     </tr>`;
@@ -640,7 +672,7 @@
                 const stockStatusText = isMinus ? (stokCukup ? '✅ Stok Cukup' :
                     `❌ Stok Kurang (${item.stok_sebelum}/${Math.abs(item.perubahan)})`) : '➕ Penambahan Stok';
                 const stockStatusColor = isMinus ? (stokCukup ? 'text-green-600' : 'text-red-600') :
-                'text-blue-600';
+                    'text-blue-600';
 
                 return `
                     <tr class="hover:bg-slate-50">
@@ -657,13 +689,13 @@
                         <td class="px-4 py-3 text-center">
                             ${item.status === 'pending' ? 
                                 `<div class="flex gap-2 justify-center">
-                                        <button ${approveDisabled ? 'disabled' : `onclick="showApproveModal('penyesuaian',${item.id},'${item.produk_nama.replace(/'/g,"\\'")}')"`} class="${approveDisabled ? 'bg-gray-300 cursor-not-allowed btn-disabled' : 'bg-emerald-500 hover:bg-emerald-600'} text-white px-3 py-1.5 rounded-lg text-xs">
-                                            <i class="fas fa-check text-xs mr-1"></i> Setuju
-                                        </button>
-                                        <button onclick="showRejectModal('penyesuaian',${item.id},'${item.produk_nama.replace(/'/g,"\\'")}')" class="bg-rose-500 hover:bg-rose-600 text-white px-3 py-1.5 rounded-lg text-xs">
-                                            <i class="fas fa-times text-xs mr-1"></i> Tolak
-                                        </button>
-                                    </div>` : '<span class="text-slate-400 text-xs">-</span>'
+                                                        <button ${approveDisabled ? 'disabled' : `onclick="showApproveModal('penyesuaian',${item.id},'${item.produk_nama.replace(/'/g,"\\'")}')"`} class="${approveDisabled ? 'bg-gray-300 cursor-not-allowed btn-disabled' : 'bg-emerald-500 hover:bg-emerald-600'} text-white px-3 py-1.5 rounded-lg text-xs">
+                                                            <i class="fas fa-check text-xs mr-1"></i> Setuju
+                                                        </button>
+                                                        <button onclick="showRejectModal('penyesuaian',${item.id},'${item.produk_nama.replace(/'/g,"\\'")}')" class="bg-rose-500 hover:bg-rose-600 text-white px-3 py-1.5 rounded-lg text-xs">
+                                                            <i class="fas fa-times text-xs mr-1"></i> Tolak
+                                                        </button>
+                                                    </div>` : '<span class="text-slate-400 text-xs">-</span>'
                             }
                         </td>
                     </tr>`;

@@ -151,19 +151,13 @@
                         <h3 class="font-semibold text-slate-800">Request Tambah Stok</h3>
                     </div>
                 </div>
-                <div class="p-4 space-y-3">
-                    @php
-                        $latestRequests = \App\Models\TambahStock::with('produk')
-                            ->where('requested_by', Auth::id())
-                            ->orderBy('created_at', 'desc')
-                            ->limit(5)
-                            ->get();
-                    @endphp
-                    @forelse($latestRequests as $req)
+                <div class="p-4 space-y-3 max-h-[300px] overflow-y-auto">
+                    @forelse($latestTambahStok as $req)
                         <div class="flex justify-between items-start p-3 bg-slate-50 rounded-lg">
                             <div class="flex-1">
                                 <p class="font-medium text-slate-800">
-                                    {{ $req->produk->nama_produk ?? 'Produk tidak tersedia' }}</p>
+                                    {{ $req->produk->nama_produk ?? 'Produk tidak tersedia' }}
+                                </p>
                                 <div class="flex items-center gap-3 mt-1">
                                     <span class="text-emerald-600 font-semibold text-sm">+{{ $req->jumlah_request }}
                                         pcs</span>
@@ -204,7 +198,7 @@
                 </div>
             </div>
 
-            <!-- Pengiriman Stok -->
+            <!-- 🔥 PENGIRIMAN STOK 🔥 -->
             <div class="bg-white rounded-xl shadow-sm overflow-hidden border border-slate-200">
                 <div class="px-5 py-3.5 border-b border-slate-200 bg-slate-50/50">
                     <div class="flex items-center gap-2">
@@ -212,16 +206,113 @@
                         <h3 class="font-semibold text-slate-800">Pengiriman Stok</h3>
                     </div>
                 </div>
-                <div class="p-4">
-                    <div class="text-center py-6 text-slate-400">
-                        <i class="fas fa-inbox text-3xl mb-2 block text-slate-300"></i>
-                        <p class="text-sm">Belum ada pengiriman stok</p>
-                    </div>
+                <div class="p-4 space-y-3 max-h-[300px] overflow-y-auto">
+                    @forelse($latestPengiriman as $pengiriman)
+                        <div class="flex justify-between items-start p-3 bg-slate-50 rounded-lg">
+                            <div class="flex-1">
+                                <div class="flex items-center justify-between">
+                                    <p class="font-medium text-slate-800">
+                                        {{ $pengiriman->produk->nama_produk ?? 'Produk tidak tersedia' }}
+                                    </p>
+                                    <span
+                                        class="text-xs font-mono text-indigo-600">{{ $pengiriman->kode_pengiriman }}</span>
+                                </div>
+                                <div class="flex items-center gap-3 mt-1">
+                                    <span class="text-red-600 font-semibold text-sm">-{{ $pengiriman->jumlah }} pcs</span>
+                                    <span
+                                        class="text-xs text-slate-400">{{ $pengiriman->created_at->diffForHumans() }}</span>
+                                </div>
+                                <div class="flex items-center justify-between mt-2">
+                                    <div class="text-xs text-slate-500">
+                                        <i class="fas fa-store mr-1"></i> Tujuan: {{ $pengiriman->tujuan_toko ?? 'Toko' }}
+                                    </div>
+                                    <div>
+                                        @if ($pengiriman->status == 'pending')
+                                            <span
+                                                class="inline-flex items-center gap-1 text-xs text-yellow-600 bg-yellow-50 px-2 py-0.5 rounded-full">
+                                                <i class="fas fa-clock text-[10px]"></i> Menunggu
+                                            </span>
+                                        @elseif($pengiriman->status == 'waiting_owner')
+                                            <span
+                                                class="inline-flex items-center gap-1 text-xs text-purple-600 bg-purple-50 px-2 py-0.5 rounded-full">
+                                                <i class="fas fa-hourglass-half text-[10px]"></i> Menunggu Owner
+                                            </span>
+                                        @elseif($pengiriman->status == 'approved')
+                                            <span
+                                                class="inline-flex items-center gap-1 text-xs text-green-600 bg-green-50 px-2 py-0.5 rounded-full">
+                                                <i class="fas fa-check-circle text-[10px]"></i> Disetujui
+                                            </span>
+                                        @else
+                                            <span
+                                                class="inline-flex items-center gap-1 text-xs text-red-600 bg-red-50 px-2 py-0.5 rounded-full">
+                                                <i class="fas fa-times-circle text-[10px]"></i> Ditolak
+                                            </span>
+                                        @endif
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    @empty
+                        <div class="text-center py-6 text-slate-400">
+                            <i class="fas fa-inbox text-3xl mb-2 block text-slate-300"></i>
+                            <p class="text-sm">Belum ada pengiriman stok</p>
+                        </div>
+                    @endforelse
                 </div>
                 <div class="px-4 py-3 border-t border-slate-100 bg-slate-50/30">
                     <a href="{{ route('gudang.pengiriman.index') }}"
                         class="text-indigo-600 text-xs hover:underline flex items-center justify-center gap-1">
                         Lihat Semua Pengiriman <i class="fas fa-arrow-right text-xs"></i>
+                    </a>
+                </div>
+            </div>
+
+            <!-- Request dari Kasir yang Menunggu -->
+            <div class="bg-white rounded-xl shadow-sm overflow-hidden border border-slate-200">
+                <div class="px-5 py-3.5 border-b border-slate-200 bg-slate-50/50">
+                    <div class="flex items-center gap-2">
+                        <i class="fas fa-store text-purple-500 text-lg"></i>
+                        <h3 class="font-semibold text-slate-800">Request dari Kasir</h3>
+                        @if (($pendingKasirRequests ?? 0) > 0)
+                            <span
+                                class="bg-red-500 text-white text-xs px-2 py-0.5 rounded-full">{{ $pendingKasirRequests ?? 0 }}</span>
+                        @endif
+                    </div>
+                </div>
+                <div class="p-4 space-y-3 max-h-[250px] overflow-y-auto">
+                    @forelse($latestKasirRequests as $req)
+                        <div
+                            class="flex justify-between items-start p-3 bg-purple-50 rounded-lg border-l-4 border-purple-400">
+                            <div class="flex-1">
+                                <p class="font-medium text-slate-800">
+                                    {{ $req->produk->nama_produk ?? 'Produk tidak tersedia' }}
+                                </p>
+                                <div class="flex items-center gap-3 mt-1">
+                                    <span class="text-emerald-600 font-semibold text-sm">+{{ $req->jumlah }} pcs</span>
+                                    <span class="text-xs text-slate-400">{{ $req->created_at->diffForHumans() }}</span>
+                                </div>
+                                <div class="text-xs text-slate-500 mt-1">
+                                    <i class="fas fa-user mr-1"></i> Diajukan oleh: {{ $req->requester->name ?? 'Kasir' }}
+                                </div>
+                            </div>
+                            <div class="flex gap-1">
+                                <a href="{{ route('gudang.approval_request_kasir.index') }}"
+                                    class="text-indigo-600 hover:text-indigo-800 text-xs p-1" title="Proses">
+                                    <i class="fas fa-check-circle"></i>
+                                </a>
+                            </div>
+                        </div>
+                    @empty
+                        <div class="text-center py-6 text-slate-400">
+                            <i class="fas fa-inbox text-3xl mb-2 block text-slate-300"></i>
+                            <p class="text-sm">Tidak ada request dari kasir</p>
+                        </div>
+                    @endforelse
+                </div>
+                <div class="px-4 py-3 border-t border-slate-100 bg-slate-50/30">
+                    <a href="{{ route('gudang.approval_request_kasir.index') }}"
+                        class="text-indigo-600 text-xs hover:underline flex items-center justify-center gap-1">
+                        Proses Request dari Kasir <i class="fas fa-arrow-right text-xs"></i>
                     </a>
                 </div>
             </div>
