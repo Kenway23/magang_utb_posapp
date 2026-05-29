@@ -71,22 +71,12 @@ cp .env.example .env
 php artisan key:generate
 ```
 
-**4. Sesuaikan konfigurasi database di file `.env`**
-```env
-DB_CONNECTION=mysql
-DB_HOST=127.0.0.1
-DB_PORT=3306
-DB_DATABASE=posapp_db
-DB_USERNAME=root
-DB_PASSWORD=
-```
-
-**5. Jalankan migrasi dan seeder**
+**4. Jalankan migrasi dan seeder**
 ```bash
 php artisan migrate --seed
 ```
 
-**6. Jalankan aplikasi**
+**5. Jalankan aplikasi**
 ```bash
 npm run dev
 php artisan serve
